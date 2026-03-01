@@ -1,0 +1,118 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2867
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fmodern\fcharset0 Courier;\f1\froman\fcharset0 Times-Roman;\f2\froman\fcharset0 Times-Bold;
+}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat2\levelspace360\levelindent0{\*\levelmarker \{decimal\}}{\leveltext\leveltemplateid1\'01\'00;}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listname ;}\listid1}
+{\list\listtemplateid2\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat0\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid101\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid2}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs26 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 # Dsquares Offers SDK & Host Application\
+\
+This repository contains a production-ready Native Mobile SDK for fetching and displaying merchant offers, along with a Host Application demonstrating its seamless integration. The project is designed strictly following iOS best practices, focusing on modularity, clean architecture, and UI/UX fidelity.\
+\
+## \uc0\u55356 \u57303  Architecture Overview\
+\
+The solution is divided into two main components: an isolated SDK and a lightweight Host App. \
+\
+The SDK (`OffersSDK`) is implemented as a **Local Swift Package**. This ensures complete isolation from the host application and guarantees that the host app can only interact with the SDK through its defined public interface. \
+\
+[cite_start]Within the SDK, I utilized the **MVVM (Model-View-ViewModel)** pattern combined with principles of Clean Architecture[cite: 62]:\
+* **Presentation Layer:** Handled by SwiftUI Views and `ObservableObject` ViewModels. The ViewModels map data and manage UI states (Loading, Loaded, Empty, Error) internally, abstracting this logic from the Host App.\
+* **Domain Layer:** Business rules, such as pagination logic and data validation, are encapsulated here.\
+* **Data Layer:** A robust Networking service utilizing Swift's native `async/await` concurrency mechanism. It includes comprehensive error handling (e.g., offline states, invalid responses) and uses Protocols for dependency injection to facilitate unit testing.\
+\
+## \uc0\u55357 \u56960  Setup & Build Instructions\
+\
+1. Clone the repository:\
+   ```bash\
+   git clone [https://github.com/YOUR_USERNAME/Dsquares-Offers-SDK.git](https://github.com/YOUR_USERNAME/Dsquares-Offers-SDK.git)\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls1\ilvl0
+\f1\fs24 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	2	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Open the workspace file 
+\f0\fs26 DsquaresOffersWorkspace.xcworkspace
+\f1\fs24  in Xcode (Do not open the 
+\f0\fs26 .xcodeproj
+\f1\fs24  files directly to maintain the package links).\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	3	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Ensure the target is set to 
+\f2\b OffersHostApp
+\f1\b0 .\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	4	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Select an iOS Simulator running 
+\f2\b iOS 15.0 or later
+\f1\b0 .\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	5	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Press 
+\f0\fs26 Cmd + R
+\f1\fs24  to build and run the application.\
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f2\b\fs36 \cf0 \uc0\u55357 \u56588  SDK Public Interface & Integration\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 The SDK is designed to be plug-and-play. All internal logic (networking, state management, caching) is completely hidden from the Host App.\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f2\b\fs28 \cf0 1. Integration Layer\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 The Host App utilizes a simple abstraction layer 
+\f0\fs26 OffersSDKManager
+\f1\fs24  to interact with the SDK. This prevents tight coupling.\
+\pard\pardeftab720\partightenfactor0
+\cf0 Swift\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs26 \cf0 import SwiftUI\
+import OffersSDK\
+\
+public struct OffersSDKManager \{\
+    public static func createOffersScreen() -> some View \{\
+        return OffersListView()\
+    \}\
+\}\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f2\b\fs28 \cf0 2. Presenting the SDK\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 The host app can present the SDK effortlessly from any standard View hierarchy.\
+\pard\pardeftab720\partightenfactor0
+\cf0 Swift\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs26 \cf0 // Inside your Host App View\
+.sheet(isPresented: $showOffers) \{\
+    OffersSDKManager.createOffersScreen()\
+\}\
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f2\b\fs36 \cf0 \uc0\u10024  Key Features Implemented\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls2\ilvl0
+\fs24 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Native Concurrency:
+\f1\b0  
+\f0\fs26 async/await
+\f1\fs24  for efficient and readable networking.\
+\ls2\ilvl0
+\f2\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Pagination & Pull-to-Refresh:
+\f1\b0  Seamless data navigation as per API capabilities.\
+\ls2\ilvl0
+\f2\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 State Isolation:
+\f1\b0  The SDK manages its own loading indicators and offline warnings.\
+\ls2\ilvl0
+\f2\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Unit Testing:
+\f1\b0  Critical components including networking mapping and business logic are fully tested.\
+}
