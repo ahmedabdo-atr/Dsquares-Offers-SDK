@@ -13,7 +13,7 @@ struct OfferRowView: View {
     var body: some View {
         HStack(spacing: 12) {
             // swiftui 15 introduced AsyncImage which simplifies loading images from URLs with built-in caching and error handling.
-            AsyncImage(url: URL(string: offer.imageUrl ?? "")) { phase in
+            AsyncImage(url: offer.imageUrl) { phase in
                 switch phase {
                 case .empty:
                     ProgressView()

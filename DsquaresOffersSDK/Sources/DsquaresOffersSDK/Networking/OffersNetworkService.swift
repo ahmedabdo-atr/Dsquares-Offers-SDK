@@ -7,11 +7,11 @@
 
 import Foundation
 
-public protocol OffersNetworkServiceProtocol {
+public protocol OffersNetworkServiceProtocol: Sendable {
     func fetchOffers(page: Int) async throws -> OffersResponseDTO
 }
 
-public class OffersNetworkService: OffersNetworkServiceProtocol {
+public final class OffersNetworkService: OffersNetworkServiceProtocol {
     
     private let baseURL = "https://connect-api.dsquares.com/"
     

@@ -9,7 +9,7 @@ import Foundation
 
 /// Use case to fetch paginated offers.
 /// Encapsulates the business logic for retrieving offers.
-public protocol GetOffersUseCaseProtocol {
+public protocol GetOffersUseCaseProtocol: Sendable {
     func execute(page: Int) async throws -> [Offer]
 }
 
