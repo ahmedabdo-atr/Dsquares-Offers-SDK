@@ -15,4 +15,8 @@ public struct OffersSDKManager {
     public static func createOffersScreen() -> some View {
         return DsquaresOffersSDK.OffersSDKManager.createOffersScreen()
     }
+
+    public static func createLoginScreen() -> some View {
+        return DsquaresOffersSDK.OffersSDKManager.createLoginScreen()
+    }
 }
