@@ -22,32 +22,25 @@ public class OffersViewModel: ObservableObject {
     @Published public private(set) var state: ViewState = .idle
     @Published public private(set) var isFetchingMore = false
     
-    private let networkService: OffersNetworkServiceProtocol
+    private let getOffersUseCase: GetOffersUseCaseProtocol
     private var currentPage = 1
-    private var totalPages: Int? = 1
+    private var hasMorePages = true
     
-    // Dependency Injection for the network service, default value provided for convenience
-    public init(networkService: OffersNetworkServiceProtocol = OffersNetworkService()) {
-        self.networkService = networkService
+    public init(getOffersUseCase: GetOffersUseCaseProtocol) {
+        self.getOffersUseCase = getOffersUseCase
     }
     
-    // Pull and refresh action to fetch the first page and reset the state
     public func fetchFirstPage() async {
         state = .loading
         currentPage = 1
         offers.removeAll()
+        hasMorePages = true
         await fetchOffers(page: currentPage)
     }
     
-    // Load more action to fetch the next page if needed
     public func loadMoreIfNeeded(currentItem item: Offer) async {
         guard let lastItem = offers.last, lastItem.id == item.id else { return }
-        
-        // Ensure there are more pages to fetch
-        guard let totalPages = totalPages, currentPage < totalPages else { return }
-        
-        // Ensure we're not already fetching data to avoid duplicate requests
-        guard !isFetchingMore else { return }
+        guard hasMorePages, !isFetchingMore else { return }
         
         isFetchingMore = true
         currentPage += 1
@@ -55,27 +48,24 @@ public class OffersViewModel: ObservableObject {
         isFetchingMore = false
     }
     
-    // The main function that communicates with the Network Layer
     private func fetchOffers(page: Int) async {
         do {
-            let response = try await networkService.fetchOffers(page: page)
+            let newOffers = try await getOffersUseCase.execute(page: page)
             
-            if page == 1 {
-                self.offers = response.data
+            if newOffers.isEmpty {
+                hasMorePages = false
             } else {
-                self.offers.append(contentsOf: response.data)
-                // Append the new data to the existing data
+                if page == 1 {
+                    self.offers = newOffers
+                } else {
+                    self.offers.append(contentsOf: newOffers)
+                }
             }
             
-            self.totalPages = response.totalPages
             self.state = self.offers.isEmpty ? .empty : .loaded
             
         } catch {
-            if let networkError = error as? NetworkError {
-                self.state = .error(networkError.customMessage)
-            } else {
-                self.state = .error(error.localizedDescription)
-            }
+            self.state = .error(error.localizedDescription)
         }
     }
 }

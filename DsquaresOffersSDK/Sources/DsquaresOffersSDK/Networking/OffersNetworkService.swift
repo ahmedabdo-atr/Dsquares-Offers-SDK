@@ -8,7 +8,7 @@
 import Foundation
 
 public protocol OffersNetworkServiceProtocol {
-    func fetchOffers(page: Int) async throws -> OffersResponse
+    func fetchOffers(page: Int) async throws -> OffersResponseDTO
 }
 
 public class OffersNetworkService: OffersNetworkServiceProtocol {
@@ -17,19 +17,16 @@ public class OffersNetworkService: OffersNetworkServiceProtocol {
     
     public init() {}
     
-    public func fetchOffers(page: Int) async throws -> OffersResponse {
+    public func fetchOffers(page: Int) async throws -> OffersResponseDTO {
             guard let url = URL(string: "\(baseURL)?page=\(page)") else {
                 throw NetworkError.invalidURL
             }
             
-            // create a URLRequest instead of using URL directly,
             var request = URLRequest(url: url)
             request.httpMethod = "GET"
             
-            // add the API key to the request header
             let apiKey = "H9eAm0I3lDZX8XtjwjYBkVJe2Mb0TTeB"
             request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-            
             request.addValue("application/json", forHTTPHeaderField: "Accept")
             
             do {
@@ -40,7 +37,7 @@ public class OffersNetworkService: OffersNetworkServiceProtocol {
                     throw NetworkError.invalidResponse
                 }
                 
-                let decodedResponse = try JSONDecoder().decode(OffersResponse.self, from: data)
+                let decodedResponse = try JSONDecoder().decode(OffersResponseDTO.self, from: data)
                 return decodedResponse
                 
             } catch let error as URLError {
