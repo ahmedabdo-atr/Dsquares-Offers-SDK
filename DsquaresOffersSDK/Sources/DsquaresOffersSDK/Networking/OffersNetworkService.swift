@@ -40,15 +40,19 @@ public final class OffersNetworkService: OffersNetworkServiceProtocol, @unchecke
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        
+        // Mandatory Dsquares headers to identify the caller and brand
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
         request.addValue(apiKey, forHTTPHeaderField: "x-api-key")
-        request.addValue("en", forHTTPHeaderField: "Accept-Language")
+        request.addValue("IOS", forHTTPHeaderField: "Source")     // Mandatory for Dsquares
+        request.addValue("1", forHTTPHeaderField: "Brand-Id")    // Mandatory for Dsquares
+        request.addValue("en/ar", forHTTPHeaderField: "Accept-Language")
         
-        // Using Dictionary to ensure the key is exactly as the documentation says
-        let parameters: [String: Any] = ["UserIdentifier": userIdentifier]
+        // Using the DTO which generates lowercase "userIdentifier"
+        let body = LoginRequestDTO(userIdentifier: userIdentifier)
         do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: parameters)
+            request.httpBody = try JSONEncoder().encode(body)
         } catch {
             throw NetworkError.decodingFailed
         }
@@ -77,7 +81,6 @@ public final class OffersNetworkService: OffersNetworkServiceProtocol, @unchecke
         case 403:
             throw NetworkError.forbidden
         default:
-            // This will now show the exact code (like 500)
             throw NetworkError.invalidResponse(httpResponse.statusCode)
         }
     }
