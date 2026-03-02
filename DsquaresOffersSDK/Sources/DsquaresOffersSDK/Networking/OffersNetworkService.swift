@@ -41,27 +41,45 @@ public final class OffersNetworkService: OffersNetworkServiceProtocol, @unchecke
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("application/json", forHTTPHeaderField: "Accept")
         request.addValue(apiKey, forHTTPHeaderField: "x-api-key")
-        request.addValue(Locale.current.languageCode ?? "en", forHTTPHeaderField: "Accept-Language")
+        request.addValue("en", forHTTPHeaderField: "Accept-Language")
         
-        let body = LoginRequestDTO(userIdentifier: userIdentifier)
-        request.httpBody = try JSONEncoder().encode(body)
+        // Using Dictionary to ensure the key is exactly as the documentation says
+        let parameters: [String: Any] = ["UserIdentifier": userIdentifier]
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: parameters)
+        } catch {
+            throw NetworkError.decodingFailed
+        }
         
         let (data, response) = try await URLSession.shared.data(for: request)
         
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
-            throw NetworkError.invalidResponse
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkError.requestFailed
         }
         
-        let decodedResponse = try JSONDecoder().decode(LoginResponseDTO.self, from: data)
-        
-        // Save the token for subsequent requests
-        if let token = decodedResponse.result?.accessToken {
-            self.accessToken = token
+        switch httpResponse.statusCode {
+        case 200...299:
+            do {
+                let decodedResponse = try JSONDecoder().decode(LoginResponseDTO.self, from: data)
+                
+                if let token = decodedResponse.result?.accessToken {
+                    self.accessToken = token
+                }
+                
+                return decodedResponse
+            } catch {
+                throw NetworkError.decodingFailed
+            }
+        case 401:
+            throw NetworkError.unauthorized
+        case 403:
+            throw NetworkError.forbidden
+        default:
+            // This will now show the exact code (like 500)
+            throw NetworkError.invalidResponse(httpResponse.statusCode)
         }
-        
-        return decodedResponse
     }
     
     public func fetchOffers(page: Int) async throws -> OffersResponseDTO {
@@ -86,13 +104,22 @@ public final class OffersNetworkService: OffersNetworkServiceProtocol, @unchecke
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
             
-            guard let httpResponse = response as? HTTPURLResponse,
-                  (200...299).contains(httpResponse.statusCode) else {
-                throw NetworkError.invalidResponse
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw NetworkError.requestFailed
             }
             
-            let decodedResponse = try JSONDecoder().decode(OffersResponseDTO.self, from: data)
-            return decodedResponse
+            switch httpResponse.statusCode {
+            case 200...299:
+                return try JSONDecoder().decode(OffersResponseDTO.self, from: data)
+            case 401:
+                throw NetworkError.unauthorized
+            case 403:
+                throw NetworkError.forbidden
+            case 500...599:
+                throw NetworkError.serverError
+            default:
+                throw NetworkError.invalidResponse(httpResponse.statusCode)
+            }
             
         } catch let error as URLError {
             if error.code == .notConnectedToInternet {
@@ -100,6 +127,8 @@ public final class OffersNetworkService: OffersNetworkServiceProtocol, @unchecke
             } else {
                 throw NetworkError.requestFailed
             }
+        } catch let error as NetworkError {
+            throw error
         } catch {
             throw NetworkError.decodingFailed
         }

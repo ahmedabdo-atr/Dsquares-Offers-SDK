@@ -35,6 +35,8 @@ public final class LoginViewModel: ObservableObject {
             } else {
                 errorMessage = "Authentication failed. Please try again."
             }
+        } catch let error as NetworkError {
+            errorMessage = error.customMessage
         } catch {
             errorMessage = error.localizedDescription
         }
