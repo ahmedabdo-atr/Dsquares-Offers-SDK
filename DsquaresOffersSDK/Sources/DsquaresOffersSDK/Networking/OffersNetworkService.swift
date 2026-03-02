@@ -12,13 +12,24 @@ public protocol OffersNetworkServiceProtocol: Sendable {
     func fetchOffers(page: Int) async throws -> OffersResponseDTO
 }
 
-public final class OffersNetworkService: OffersNetworkServiceProtocol {
+public final class OffersNetworkService: OffersNetworkServiceProtocol, @unchecked Sendable {
     
     private let baseURL = "https://connect-api.dsquares.com"
     private let apiKey = "H9eAm0I3lDZX8XtjwjYBkVJe2Mb0TTeB"
+    private let lock = NSLock()
     
     // In a real app, this should be in a secure storage like Keychain
-    private var accessToken: String?
+    private var _accessToken: String?
+    private var accessToken: String? {
+        get {
+            lock.lock(); defer { lock.unlock() }
+            return _accessToken
+        }
+        set {
+            lock.lock(); defer { lock.unlock() }
+            _accessToken = newValue
+        }
+    }
     
     public init() {}
     
