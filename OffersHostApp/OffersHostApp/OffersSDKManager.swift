@@ -13,7 +13,6 @@ public struct OffersSDKManager {
     
     // A very simple function that the app calls to get the offers screen
     public static func createOffersScreen() -> some View {
-        // In a real implementation, you might want to pass some configuration or user data to the SDK here
-        return OffersListView()
+        return DsquaresOffersSDK.OffersSDKManager.createOffersScreen()
     }
 }
