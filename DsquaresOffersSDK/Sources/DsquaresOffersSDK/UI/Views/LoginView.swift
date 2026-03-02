@@ -8,10 +8,13 @@
 import SwiftUI
 
 public struct LoginView: View {
+    @StateObject private var viewModel: LoginViewModel
     @State private var phoneNumber = ""
     @Environment(\.dismiss) var dismiss
     
-    public init() {}
+    public init(viewModel: LoginViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
     
     public var body: some View {
         VStack(spacing: 30) {
@@ -30,17 +33,26 @@ public struct LoginView: View {
             .environment(\.layoutDirection, .rightToLeft)
             
             // Input Field
-            HStack {
-                Image(systemName: "iphone")
-                    .foregroundColor(.gray)
+            VStack(alignment: .trailing, spacing: 8) {
+                HStack {
+                    Image(systemName: "iphone")
+                        .foregroundColor(.gray)
+                    
+                    TextField("ادخل رقم الهاتف", text: $phoneNumber)
+                        .keyboardType(.phonePad)
+                        .multilineTextAlignment(.trailing)
+                }
+                .padding()
+                .background(DSColor.secondaryBackground)
+                .cornerRadius(12)
                 
-                TextField("ادخل رقم الهاتف", text: $phoneNumber)
-                    .keyboardType(.phonePad)
-                    .multilineTextAlignment(.trailing)
+                if let error = viewModel.errorMessage {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                        .padding(.horizontal)
+                }
             }
-            .padding()
-            .background(DSColor.secondaryBackground)
-            .cornerRadius(12)
             .padding(.horizontal)
             
             Spacer()
@@ -48,21 +60,31 @@ public struct LoginView: View {
             // Buttons
             VStack(spacing: 16) {
                 Button(action: {
-                    // Handle Login Logic
+                    Task {
+                        await viewModel.login(userIdentifier: phoneNumber)
+                    }
                 }) {
-                    Text("تسجيل الدخول")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(DSColor.primary)
-                        .cornerRadius(12)
+                    ZStack {
+                        if viewModel.isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        } else {
+                            Text("تسجيل الدخول")
+                        }
+                    }
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(phoneNumber.isEmpty ? Color.gray.opacity(0.5) : DSColor.primary)
+                    .cornerRadius(12)
                 }
+                .disabled(viewModel.isLoading || phoneNumber.isEmpty)
                 
                 Button(action: {
-                    // Navigate to Offers directly as per Figma flow maybe?
+                    dismiss()
                 }) {
-                    Text("القسائم")
+                    Text("إلغاء")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(DSColor.textSecondary)
                         .frame(maxWidth: .infinity)
@@ -75,5 +97,10 @@ public struct LoginView: View {
             .padding(.bottom, 40)
         }
         .background(Color.white)
+        .onChange(of: viewModel.isLoggedIn) { loggedIn in
+            if loggedIn {
+                dismiss() // Close login on success
+            }
+        }
     }
 }

@@ -12,10 +12,8 @@ import SwiftUI
 public struct OffersSDKManager {
     
     /// Entry point to create the Offers List screen.
-    /// This handles dependency injection internally.
     @MainActor
     public static func createOffersScreen() -> some View {
-        // Compose dependencies
         let networkService = OffersNetworkService()
         let repository = OffersRepository(networkService: networkService)
         let getOffersUseCase = GetOffersUseCase(repository: repository)
@@ -24,5 +22,15 @@ public struct OffersSDKManager {
         return NavigationView {
             OffersListView(viewModel: viewModel)
         }
+    }
+    
+    /// Entry point to create the Login screen.
+    @MainActor
+    public static func createLoginScreen() -> some View {
+        let networkService = OffersNetworkService()
+        let loginUseCase = LoginUseCase(networkService: networkService)
+        let viewModel = LoginViewModel(loginUseCase: loginUseCase)
+        
+        return LoginView(viewModel: viewModel)
     }
 }
