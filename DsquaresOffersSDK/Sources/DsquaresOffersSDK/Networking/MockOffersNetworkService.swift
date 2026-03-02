@@ -26,9 +26,10 @@ public final class MockOffersNetworkService: OffersNetworkServiceProtocol, @unch
         )
         
         let response = LoginResponseDTO(
-            statusCode: 1,
+            result: tokenResult,
             message: "Success",
-            result: tokenResult
+            statusCode: 1,
+            statusName: "OK"
         )
         
         self.accessToken = tokenResult.accessToken
@@ -71,7 +72,7 @@ public final class MockOffersNetworkService: OffersNetworkServiceProtocol, @unch
         ]
         
         return OffersResponseDTO(
-            offers: mockOffers,
+            data: mockOffers,
             totalCount: 3,
             currentPage: page,
             totalPages: 1
