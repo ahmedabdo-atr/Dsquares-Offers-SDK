@@ -14,6 +14,8 @@ public protocol OffersNetworkServiceProtocol: Sendable {
 
 public final class OffersNetworkService: OffersNetworkServiceProtocol, @unchecked Sendable {
     
+    public static let shared = OffersNetworkService()
+    
     private let baseURL = "https://connect-api.dsquares.com"
     private let apiKey = "H9eAm0I3lDZX8XtjwjYBkVJe2Mb0TTeB"
     private let lock = NSLock()

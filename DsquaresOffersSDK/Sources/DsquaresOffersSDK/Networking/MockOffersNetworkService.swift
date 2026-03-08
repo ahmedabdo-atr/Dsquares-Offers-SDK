@@ -9,6 +9,8 @@ import Foundation
 
 public final class MockOffersNetworkService: OffersNetworkServiceProtocol, @unchecked Sendable {
     
+    public static let shared = MockOffersNetworkService()
+    
     private var accessToken: String?
     
     public init() {}

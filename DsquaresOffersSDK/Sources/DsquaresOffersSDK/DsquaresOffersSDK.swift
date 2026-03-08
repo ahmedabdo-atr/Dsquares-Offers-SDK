@@ -15,7 +15,7 @@ public struct OffersSDKManager {
     private static let useMock = false // ✅ Changed to false as API is now working
     
     private static func getNetworkService() -> OffersNetworkServiceProtocol {
-        return useMock ? MockOffersNetworkService() : OffersNetworkService()
+        return useMock ? MockOffersNetworkService.shared : OffersNetworkService.shared
     }
     
     /// Entry point to create the Offers List screen.
