@@ -143,6 +143,10 @@ public final class OffersNetworkService: OffersNetworkServiceProtocol, @unchecke
         
         print("📥 [OffersSDK] Items Status Code: \(httpResponse.statusCode)")
         
+        if let responseString = String(data: data, encoding: .utf8) {
+            print("📥 [OffersSDK] Items Response Body: \(responseString)")
+        }
+        
         if httpResponse.statusCode == 200 {
             do {
                 let itemsResponse = try JSONDecoder().decode(ItemsResponseDTO.self, from: data)
@@ -150,14 +154,19 @@ public final class OffersNetworkService: OffersNetworkServiceProtocol, @unchecke
                 // Map ItemsResponseDTO to the legacy OffersResponseDTO to keep existing logic working
                 // Or we can refactor the whole chain, but mapping is safer for now.
                 let legacyOffers = itemsResponse.result?.items.map { item -> OfferDTO in
+                    let domainOffer = item.toDomain()
+                    print("📦 [OffersSDK] Mapped Item: \(item.name), Image: \(domainOffer.imageUrl?.absoluteString ?? "N/A")")
                     return OfferDTO(
-                        id: item.toDomain().id,
+                        id: domainOffer.id,
                         title: item.name,
                         description: item.description,
-                        imageUrl: item.imageUrl,
+                        imageUrl: domainOffer.imageUrl?.absoluteString,
                         brandName: item.denominations?.first?.brand,
                         brandLogo: nil,
-                        expiryDate: nil
+                        expiryDate: nil,
+                        isLocked: item.locked,
+                        rewardType: item.rewardType,
+                        points: "\(item.denominations?.first?.points ?? 0)"
                     )
                 } ?? []
                 

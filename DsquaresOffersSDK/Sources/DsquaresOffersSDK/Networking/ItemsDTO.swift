@@ -38,7 +38,28 @@ public struct ItemsResponseDTO: Codable {
     public let statusName: String?
     
     enum CodingKeys: String, CodingKey {
-        case result, message, statusCode, statusName
+        case result, data, Data, Result, Message, StatusCode, StatusName
+        case message, statusCode, statusName
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        result = (try? container.decodeIfPresent(ItemsResult.self, forKey: .result)) ?? 
+                 (try? container.decodeIfPresent(ItemsResult.self, forKey: .data)) ?? 
+                 (try? container.decodeIfPresent(ItemsResult.self, forKey: .Data)) ?? 
+                 (try? container.decodeIfPresent(ItemsResult.self, forKey: .Result))
+        
+        message = (try? container.decodeIfPresent(String.self, forKey: .message)) ?? (try? container.decodeIfPresent(String.self, forKey: .Message))
+        statusCode = try (container.decodeIfPresent(Int.self, forKey: .statusCode) ?? container.decode(Int.self, forKey: .StatusCode))
+        statusName = (try? container.decodeIfPresent(String.self, forKey: .statusName)) ?? (try? container.decodeIfPresent(String.self, forKey: .StatusName))
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(result, forKey: .result)
+        try container.encode(message, forKey: .message)
+        try container.encode(statusCode, forKey: .statusCode)
+        try container.encode(statusName, forKey: .statusName)
     }
 }
 
@@ -46,6 +67,25 @@ public struct ItemsResult: Codable {
     public let totalItems: Int
     public let totalPages: Int
     public let items: [ItemDTO]
+    
+    enum CodingKeys: String, CodingKey {
+        case totalItems, totalPages, items
+        case TotalItems, TotalPages, Items
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        totalItems = try (container.decodeIfPresent(Int.self, forKey: .totalItems) ?? container.decode(Int.self, forKey: .TotalItems))
+        totalPages = try (container.decodeIfPresent(Int.self, forKey: .totalPages) ?? container.decode(Int.self, forKey: .TotalPages))
+        items = try (container.decodeIfPresent([ItemDTO].self, forKey: .items) ?? container.decode([ItemDTO].self, forKey: .Items))
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(totalItems, forKey: .totalItems)
+        try container.encode(totalPages, forKey: .totalPages)
+        try container.encode(items, forKey: .items)
+    }
 }
 
 public struct ItemDTO: Codable {
@@ -57,18 +97,62 @@ public struct ItemDTO: Codable {
     public let locked: Bool
     public let denominations: [DenominationDTO]?
     
+    public init(code: String, name: String, description: String?, imageUrl: String?, rewardType: String?, locked: Bool, denominations: [DenominationDTO]?) {
+        self.code = code
+        self.name = name
+        self.description = description
+        self.imageUrl = imageUrl
+        self.rewardType = rewardType
+        self.locked = locked
+        self.denominations = denominations
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case code, name, description, locked, rewardType, denominations, imageUrl
+        // Extra keys for decoding
+        case image_url, ImageUrl, RewardType, Locked, Code, Name, Description
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        code = try (container.decodeIfPresent(String.self, forKey: .code) ?? container.decode(String.self, forKey: .Code))
+        name = try (container.decodeIfPresent(String.self, forKey: .name) ?? container.decode(String.self, forKey: .Name))
+        description = (try? container.decodeIfPresent(String.self, forKey: .description)) ?? (try? container.decodeIfPresent(String.self, forKey: .Description))
+        locked = (try? container.decode(Bool.self, forKey: .locked)) ?? (try? container.decode(Bool.self, forKey: .Locked)) ?? false
+        rewardType = (try? container.decodeIfPresent(String.self, forKey: .rewardType)) ?? (try? container.decodeIfPresent(String.self, forKey: .RewardType))
+        denominations = try container.decodeIfPresent([DenominationDTO].self, forKey: .denominations)
+        
+        // Flexi-Image Loading
+        imageUrl = (try? container.decodeIfPresent(String.self, forKey: .imageUrl)) ?? 
+                   (try? container.decodeIfPresent(String.self, forKey: .image_url)) ?? 
+                   (try? container.decodeIfPresent(String.self, forKey: .ImageUrl))
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(code, forKey: .code)
+        try container.encode(name, forKey: .name)
+        try container.encode(description, forKey: .description)
+        try container.encode(locked, forKey: .locked)
+        try container.encode(rewardType, forKey: .rewardType)
+        try container.encode(imageUrl, forKey: .imageUrl)
+        try container.encode(denominations, forKey: .denominations)
+    }
+    
     // Mapping to Domain Entity
     func toDomain() -> Offer {
-        // Find the "best" denomination to show (e.g., the first one)
         let firstDenom = denominations?.first
+        let finalImageUrl = imageUrl ?? firstDenom?.imageUrl
         
         return Offer(
-            id: Int(code.replacingOccurrences(of: "b-", with: "")) ?? 0, // Fallback conversion
+            id: Int(code.replacingOccurrences(of: "b-", with: "")) ?? 0,
             title: name,
             description: description,
-            imageUrl: URL(string: imageUrl ?? ""),
+            imageUrl: URL(string: finalImageUrl ?? ""),
             points: "\(firstDenom?.points ?? 0)",
-            merchantName: firstDenom?.brand
+            merchantName: firstDenom?.brand,
+            isLocked: locked,
+            rewardType: rewardType
         )
     }
 }
@@ -91,4 +175,75 @@ public struct DenominationDTO: Codable {
     public let redemptionFactor: Double?
     public let points: Int?
     public let discount: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case brand, code, name, value, categories, inStock, termsAndConditions, usageInstructions, from, to, description, denominationType, redemptionChannel, imageUrl, redemptionFactor, points, discount
+        case image_url, ImageUrl, InStock, Description, Points, Brand, Code, Name, Value
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        brand = (try? container.decodeIfPresent(String.self, forKey: .brand)) ?? (try? container.decodeIfPresent(String.self, forKey: .Brand))
+        code = (try? container.decodeIfPresent(String.self, forKey: .code)) ?? (try? container.decodeIfPresent(String.self, forKey: .Code))
+        name = (try? container.decodeIfPresent(String.self, forKey: .name)) ?? (try? container.decodeIfPresent(String.self, forKey: .Name))
+        value = (try? container.decodeIfPresent(Double.self, forKey: .value)) ?? (try? container.decodeIfPresent(Double.self, forKey: .Value))
+        categories = try? container.decodeIfPresent([String].self, forKey: .categories)
+        inStock = (try? container.decodeIfPresent(Bool.self, forKey: .inStock)) ?? (try? container.decodeIfPresent(Bool.self, forKey: .InStock))
+        termsAndConditions = try? container.decodeIfPresent(String.self, forKey: .termsAndConditions)
+        usageInstructions = try? container.decodeIfPresent(String.self, forKey: .usageInstructions)
+        from = try? container.decodeIfPresent(Double.self, forKey: .from)
+        to = try? container.decodeIfPresent(Double.self, forKey: .to)
+        description = (try? container.decodeIfPresent(String.self, forKey: .description)) ?? (try? container.decodeIfPresent(String.self, forKey: .Description))
+        denominationType = try? container.decodeIfPresent(String.self, forKey: .denominationType)
+        redemptionChannel = try? container.decodeIfPresent(String.self, forKey: .redemptionChannel)
+        redemptionFactor = try? container.decodeIfPresent(Double.self, forKey: .redemptionFactor)
+        points = (try? container.decodeIfPresent(Int.self, forKey: .points)) ?? (try? container.decodeIfPresent(Int.self, forKey: .Points))
+        discount = try? container.decodeIfPresent(String.self, forKey: .discount)
+        
+        // Flexi-Image Loading
+        imageUrl = (try? container.decodeIfPresent(String.self, forKey: .imageUrl)) ?? 
+                   (try? container.decodeIfPresent(String.self, forKey: .image_url)) ?? 
+                   (try? container.decodeIfPresent(String.self, forKey: .ImageUrl))
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(brand, forKey: .brand)
+        try container.encode(code, forKey: .code)
+        try container.encode(name, forKey: .name)
+        try container.encode(value, forKey: .value)
+        try container.encode(categories, forKey: .categories)
+        try container.encode(inStock, forKey: .inStock)
+        try container.encode(termsAndConditions, forKey: .termsAndConditions)
+        try container.encode(usageInstructions, forKey: .usageInstructions)
+        try container.encode(from, forKey: .from)
+        try container.encode(to, forKey: .to)
+        try container.encode(description, forKey: .description)
+        try container.encode(denominationType, forKey: .denominationType)
+        try container.encode(redemptionChannel, forKey: .redemptionChannel)
+        try container.encode(imageUrl, forKey: .imageUrl)
+        try container.encode(redemptionFactor, forKey: .redemptionFactor)
+        try container.encode(points, forKey: .points)
+        try container.encode(discount, forKey: .discount)
+    }
+
+    public init(brand: String?, code: String? = nil, name: String? = nil, value: Double? = nil, categories: [String]? = nil, inStock: Bool? = nil, termsAndConditions: String? = nil, usageInstructions: String? = nil, from: Double? = nil, to: Double? = nil, description: String? = nil, denominationType: String? = nil, redemptionChannel: String? = nil, imageUrl: String? = nil, redemptionFactor: Double? = nil, points: Int? = nil, discount: String? = nil) {
+        self.brand = brand
+        self.code = code
+        self.name = name
+        self.value = value
+        self.categories = categories
+        self.inStock = inStock
+        self.termsAndConditions = termsAndConditions
+        self.usageInstructions = usageInstructions
+        self.from = from
+        self.to = to
+        self.description = description
+        self.denominationType = denominationType
+        self.redemptionChannel = redemptionChannel
+        self.imageUrl = imageUrl
+        self.redemptionFactor = redemptionFactor
+        self.points = points
+        self.discount = discount
+    }
 }

@@ -1,25 +1,28 @@
-//
-//  MockNetworkService.swift
-//  DsquaresOffersSDK
-//
-//  Created by Ahmad Aboelghet on 01/03/2026.
-//
-
 import Foundation
-@testable import DsquaresOffersSDK // importing the module to access the Protocol and types
+@testable import DsquaresOffersSDK
 
-//  This is a mock implementation of the OffersNetworkServiceProtocol for testing purposes.
-class MockNetworkService: OffersNetworkServiceProtocol {
+final class MockNetworkService: OffersNetworkServiceProtocol, @unchecked Sendable {
     var shouldReturnError = false
-    var mockResponse: OffersResponse?
-
-    func fetchOffers(page: Int) async throws -> OffersResponse {
+    var mockLoginResponse: LoginResponseDTO?
+    var mockOffersResponse: OffersResponseDTO?
+    
+    func login(userIdentifier: String) async throws -> LoginResponseDTO {
         if shouldReturnError {
-            throw NetworkError.invalidResponse
+            throw NetworkError.requestFailed
         }
-        if let response = mockResponse {
+        if let response = mockLoginResponse {
             return response
         }
-        throw NetworkError.requestFailed
+        throw NetworkError.invalidResponse(400)
+    }
+    
+    func fetchOffers(page: Int) async throws -> OffersResponseDTO {
+        if shouldReturnError {
+            throw NetworkError.requestFailed
+        }
+        if let response = mockOffersResponse {
+            return response
+        }
+        throw NetworkError.invalidResponse(400)
     }
 }

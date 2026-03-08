@@ -16,8 +16,11 @@ public struct OfferDTO: Codable {
     public let brandName: String?
     public let brandLogo: String?
     public let expiryDate: String?
+    public let isLocked: Bool?
+    public let rewardType: String?
+    public let points: String?
     
-    public init(id: Int, title: String, description: String?, imageUrl: String?, brandName: String?, brandLogo: String?, expiryDate: String?) {
+    public init(id: Int, title: String, description: String?, imageUrl: String?, brandName: String?, brandLogo: String?, expiryDate: String?, isLocked: Bool? = nil, rewardType: String? = nil, points: String? = nil) {
         self.id = id
         self.title = title
         self.description = description
@@ -25,6 +28,9 @@ public struct OfferDTO: Codable {
         self.brandName = brandName
         self.brandLogo = brandLogo
         self.expiryDate = expiryDate
+        self.isLocked = isLocked
+        self.rewardType = rewardType
+        self.points = points
     }
     
     enum CodingKeys: String, CodingKey {
@@ -33,6 +39,9 @@ public struct OfferDTO: Codable {
         case brandName = "brand_name"
         case brandLogo = "brand_logo"
         case expiryDate = "expiry_date"
+        case isLocked = "is_locked"
+        case rewardType = "reward_type"
+        case points
     }
     
     // Mapping to Domain Entity
@@ -41,7 +50,11 @@ public struct OfferDTO: Codable {
             id: id,
             title: title,
             description: description,
-            imageUrl: URL(string: imageUrl ?? "")
+            imageUrl: URL(string: imageUrl ?? ""),
+            points: points,
+            merchantName: brandName,
+            isLocked: isLocked ?? false,
+            rewardType: rewardType
         )
     }
 }

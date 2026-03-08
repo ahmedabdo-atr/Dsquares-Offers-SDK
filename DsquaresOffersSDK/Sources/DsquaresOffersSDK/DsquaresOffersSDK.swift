@@ -26,9 +26,7 @@ public struct OffersSDKManager {
         let getOffersUseCase = GetOffersUseCase(repository: repository)
         let viewModel = OffersViewModel(getOffersUseCase: getOffersUseCase)
         
-        return NavigationView {
-            OffersListView(viewModel: viewModel)
-        }
+        return OffersListView(viewModel: viewModel)
     }
     
     /// Entry point to create the Login screen.

@@ -8,62 +8,115 @@ struct OfferCardView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Image Section
+            // Image Section with badges
             ZStack(alignment: .topTrailing) {
-                if let url = offer.imageUrl {
-                    AsyncImage(url: url) { phase in
-                        switch phase {
-                        case .empty:
-                            ProgressView()
-                                .frame(height: 120)
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(height: 120)
-                                .clipped()
-                        case .failure:
-                            Image(systemName: "photo")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .padding()
-                                .frame(height: 120)
-                                .background(DSColor.secondaryBackground)
-                        @unknown default:
-                            EmptyView()
-                        }
+                imageSection
+                
+                // Reward Type Badge
+                if let rewardType = offer.rewardType {
+                    Text(rewardType)
+                        .font(DSTypography.small())
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(DSColor.primary)
+                        .cornerRadius(6)
+                        .padding(8)
+                }
+                
+                // Locked State Overlay
+                if offer.isLocked {
+                    ZStack {
+                        Color.black.opacity(0.4)
+                        Image(systemName: "lock.fill")
+                            .foregroundColor(.white)
+                            .font(.title2)
                     }
-                } else {
-                    Rectangle()
-                        .fill(DSColor.secondaryBackground)
-                        .frame(height: 120)
                 }
             }
-            .frame(height: 120)
-            .cornerRadius(8) // Simplified for cross-platform compatibility
+            .frame(height: 140)
+            .clipped()
             
             // Info Section
-            VStack(alignment: .leading, spacing: 4) {
-                Text(offer.title)
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(DSColor.textPrimary)
-                    .lineLimit(1)
-                
-                Text(offer.merchantName ?? "Merchant")
-                    .font(.system(size: 12))
-                    .foregroundColor(DSColor.textSecondary)
-                
-                HStack(spacing: 2) {
-                    Text("\(offer.points ?? "0") pts")
-                        .font(.system(size: 12, weight: .bold))
+            VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(offer.merchantName ?? "Merchant")
+                        .font(DSTypography.caption())
+                        .foregroundColor(DSColor.textSecondary)
+                        .textCase(.uppercase)
+                    
+                    Text(offer.title)
+                        .font(DSTypography.subtitle())
                         .foregroundColor(DSColor.textPrimary)
+                        .lineLimit(2)
+                        .frame(height: 40, alignment: .topLeading)
+                }
+                
+                Spacer(minLength: 8)
+                
+                HStack {
+                    HStack(spacing: 4) {
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 10))
+                            .foregroundColor(DSColor.accent)
+                        Text(offer.points ?? "0")
+                            .font(DSTypography.body().bold())
+                            .foregroundColor(DSColor.textPrimary)
+                        Text("pts")
+                            .font(DSTypography.caption())
+                            .foregroundColor(DSColor.textSecondary)
+                    }
+                    
+                    Spacer()
+                    
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(DSColor.primary)
+                        .padding(6)
+                        .background(DSColor.primary.opacity(0.1))
+                        .clipShape(Circle())
                 }
             }
-            .padding(10)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(12)
         }
-        .background(DSColor.background)
-        .cornerRadius(8)
-        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .background(DSColor.surface)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.06), radius: 10, x: 0, y: 4)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(DSColor.border, lineWidth: 1)
+        )
+        .scaleEffect(offer.isLocked ? 0.98 : 1.0)
+        .animation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0), value: offer.isLocked)
+    }
+    
+    @ViewBuilder
+    private var imageSection: some View {
+        if let url = offer.imageUrl {
+            let _ = print("🖼️ [OfferCardView] Loading image from: \(url.absoluteString)")
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .empty:
+                    Rectangle()
+                        .fill(DSColor.secondaryBackground)
+                        .overlay(ProgressView())
+                case .success(let image):
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                case .failure:
+                    ZStack {
+                        Rectangle().fill(DSColor.secondaryBackground)
+                        Image(systemName: "photo")
+                            .foregroundColor(DSColor.textSecondary)
+                    }
+                @unknown default:
+                    EmptyView()
+                }
+            }
+        } else {
+            Rectangle()
+                .fill(DSColor.secondaryBackground)
+        }
     }
 }

@@ -4,63 +4,60 @@ import XCTest
 @MainActor
 final class OffersSDKTests: XCTestCase {
     
-    // Just a reminder: when writing tests, we want to cover:
-    func testOfferDecoding() throws {
-        // Given json data for an offer
-        let jsonString = """
-        {
-            "id": 101,
-            "title": "50% Off Coffee",
-            "description": "Get half price on your next coffee.",
-            "imageUrl": "https://example.com/coffee.png"
-        }
-        """
-        let jsonData = jsonString.data(using: .utf8)!
-        
-        // When: we try to decode the JSON data into an Offer model
-        let offer = try JSONDecoder().decode(Offer.self, from: jsonData)
-        
-        // Then: we verify that the data was correctly mapped
-        XCTAssertEqual(offer.id, 101)
-        XCTAssertEqual(offer.title, "50% Off Coffee")
-        XCTAssertEqual(offer.description, "Get half price on your next coffee.")
-    }
-    
-    // test the ViewModel's behavior when fetching the first page of offers successfully
-    
-    func testFetchFirstPageSuccess() async {
-        // Given: a mock service that returns a successful response
+    func testOffersViewModelFetchSuccess() async {
+        // Given
         let mockService = MockNetworkService()
-        let mockOffers = [Offer(id: 1, title: "Test Offer", description: "Desc", imageUrl: nil)]
-        mockService.mockResponse = OffersResponse(data: mockOffers, totalPages: 1)
+        let mockItems = [
+            OfferDTO(id: 1, title: "Offer 1", description: nil, imageUrl: nil, brandName: "Brand", brandLogo: nil, expiryDate: nil, points: "100")
+        ]
+        mockService.mockOffersResponse = OffersResponseDTO(data: mockItems, totalCount: 1, currentPage: 1, totalPages: 1)
         
-        let viewModel = OffersViewModel(networkService: mockService)
-        
-        // When: we call fetchFirstPage
-        await viewModel.fetchFirstPage()
-        
-        // Then: we expect the ViewModel to update its state and offers list
-        XCTAssertEqual(viewModel.state, .loaded)
-        XCTAssertEqual(viewModel.offers.count, 1)
-        XCTAssertEqual(viewModel.offers.first?.title, "Test Offer")
-    }
-    
-    // test the ViewModel's behavior when fetching the first page of offers fails due to a network error
-    func testFetchFirstPageFailure() async {
-        // Given: a mock service that returns an error
-        let mockService = MockNetworkService()
-        mockService.shouldReturnError = true
-        
-        let viewModel = OffersViewModel(networkService: mockService)
+        let repository = OffersRepository(networkService: mockService)
+        let useCase = GetOffersUseCase(repository: repository)
+        let viewModel = OffersViewModel(getOffersUseCase: useCase)
         
         // When
         await viewModel.fetchFirstPage()
         
-        // Then: we expect the ViewModel to update its state to error and set the error message
-        if case .error(let message) = viewModel.state {
-            XCTAssertEqual(message, NetworkError.invalidResponse.customMessage)
+        // Then
+        if case .loaded = viewModel.state {
+            XCTAssertEqual(viewModel.offers.count, 1)
+            XCTAssertEqual(viewModel.offers.first?.title, "Offer 1")
         } else {
-            XCTFail("State should be error")
+            XCTFail("State should be loaded, but was \(viewModel.state)")
         }
+    }
+    
+    func testLoginViewModelSuccess() async {
+        // Given
+        let mockService = MockNetworkService()
+        let tokenResult = TokenResultDTO(tokenType: "Bearer", accessToken: "test_token", expiresInMins: 60, refreshToken: nil)
+        mockService.mockLoginResponse = LoginResponseDTO(result: tokenResult, message: "Success", statusCode: 1, statusName: "OK", referenceCode: nil, errors: nil)
+        
+        let useCase = LoginUseCase(networkService: mockService)
+        let viewModel = LoginViewModel(loginUseCase: useCase)
+        
+        // When
+        await viewModel.login(userIdentifier: "01012345678")
+        
+        // Then
+        XCTAssertTrue(viewModel.isLoggedIn)
+        XCTAssertNil(viewModel.errorMessage)
+    }
+    
+    func testLoginViewModelFailure() async {
+        // Given
+        let mockService = MockNetworkService()
+        mockService.shouldReturnError = true
+        
+        let useCase = LoginUseCase(networkService: mockService)
+        let viewModel = LoginViewModel(loginUseCase: useCase)
+        
+        // When
+        await viewModel.login(userIdentifier: "01012345678")
+        
+        // Then
+        XCTAssertFalse(viewModel.isLoggedIn)
+        XCTAssertNotNil(viewModel.errorMessage)
     }
 }

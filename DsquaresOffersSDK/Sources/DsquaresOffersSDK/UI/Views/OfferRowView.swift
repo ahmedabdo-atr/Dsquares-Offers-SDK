@@ -33,7 +33,7 @@ struct OfferRowView: View {
                         .frame(width: 40, height: 40)
                         .foregroundColor(.gray)
                         .frame(width: 80, height: 80)
-                        .background(Color(UIColor.secondarySystemBackground))
+                        .background(DSColor.secondaryBackground)
                         .cornerRadius(8)
                 @unknown default:
                     EmptyView()

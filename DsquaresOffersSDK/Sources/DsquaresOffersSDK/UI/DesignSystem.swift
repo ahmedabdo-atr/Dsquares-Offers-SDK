@@ -10,10 +10,21 @@ import SwiftUI
 public enum DSColor {
     public static let primary = Color(hex: "E11937")
     public static let background = Color(hex: "FFFFFF")
-    public static let secondaryBackground = Color(hex: "F2F2F2")
-    public static let textPrimary = Color(hex: "000000")
-    public static let textSecondary = Color(hex: "767676")
-    public static let border = Color(hex: "E0E0E0")
+    public static let secondaryBackground = Color(hex: "F8F9FB")
+    public static let textPrimary = Color(hex: "1A1C1E")
+    public static let textSecondary = Color(hex: "6C727A")
+    public static let border = Color(hex: "E9ECEF")
+    public static let accent = Color(hex: "FFC107")
+    public static let success = Color(hex: "28A745")
+    public static let surface = Color(hex: "FFFFFF")
+}
+
+public enum DSTypography {
+    public static func title() -> Font { .system(size: 20, weight: .bold, design: .rounded) }
+    public static func subtitle() -> Font { .system(size: 16, weight: .semibold, design: .rounded) }
+    public static func body() -> Font { .system(size: 14, weight: .regular, design: .rounded) }
+    public static func caption() -> Font { .system(size: 12, weight: .medium, design: .rounded) }
+    public static func small() -> Font { .system(size: 10, weight: .bold, design: .rounded) }
 }
 
 extension Color {
