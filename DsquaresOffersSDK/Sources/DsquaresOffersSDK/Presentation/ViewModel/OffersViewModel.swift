@@ -49,8 +49,10 @@ public class OffersViewModel: ObservableObject {
     }
     
     private func fetchOffers(page: Int) async {
+        print("📦 [ViewModel] Fetching offers for page \(page)...")
         do {
             let newOffers = try await getOffersUseCase.execute(page: page)
+            print("📦 [ViewModel] Successfully received \(newOffers.count) offers.")
             
             if newOffers.isEmpty {
                 hasMorePages = false
@@ -65,6 +67,7 @@ public class OffersViewModel: ObservableObject {
             self.state = self.offers.isEmpty ? .empty : .loaded
             
         } catch {
+            print("📦 [ViewModel] Error fetching offers: \(error.localizedDescription)")
             self.state = .error(error.localizedDescription)
         }
     }

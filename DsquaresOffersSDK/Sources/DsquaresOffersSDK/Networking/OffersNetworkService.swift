@@ -34,7 +34,10 @@ public final class OffersNetworkService: OffersNetworkServiceProtocol, @unchecke
     public init() {}
     
     public func login(userIdentifier: String) async throws -> LoginResponseDTO {
+        print("🚀 [OffersSDK] Starting login request for: \(userIdentifier)")
+        
         guard let url = URL(string: "\(baseURL)/api/DynamicApp/v1/Integration/Token") else {
+            print("❌ [OffersSDK] Invalid login URL")
             throw NetworkError.invalidURL
         }
         
@@ -49,15 +52,27 @@ public final class OffersNetworkService: OffersNetworkServiceProtocol, @unchecke
         // Using the updated DTO which wraps the identifier in a "data" object as required
         let body = LoginRequestDTO(userIdentifier: userIdentifier)
         do {
-            request.httpBody = try JSONEncoder().encode(body)
+            let encodedBody = try JSONEncoder().encode(body)
+            request.httpBody = encodedBody
+            if let bodyString = String(data: encodedBody, encoding: .utf8) {
+                print("📤 [OffersSDK] Login Body: \(bodyString)")
+            }
         } catch {
+            print("❌ [OffersSDK] Encoding failed")
             throw NetworkError.decodingFailed
         }
         
         let (data, response) = try await URLSession.shared.data(for: request)
         
         guard let httpResponse = response as? HTTPURLResponse else {
+            print("❌ [OffersSDK] Failed to get HTTPURLResponse")
             throw NetworkError.requestFailed
+        }
+        
+        print("📥 [OffersSDK] Login Status Code: \(httpResponse.statusCode)")
+        
+        if let responseString = String(data: data, encoding: .utf8) {
+            print("📥 [OffersSDK] Login Response Body: \(responseString)")
         }
         
         switch httpResponse.statusCode {
@@ -66,25 +81,30 @@ public final class OffersNetworkService: OffersNetworkServiceProtocol, @unchecke
                 let decodedResponse = try JSONDecoder().decode(LoginResponseDTO.self, from: data)
                 
                 if let token = decodedResponse.result?.accessToken {
+                    print("✅ [OffersSDK] Login success. Token acquired.")
                     self.accessToken = token
                 }
                 
                 return decodedResponse
             } catch {
+                print("❌ [OffersSDK] Login decoding failed: \(error)")
                 throw NetworkError.decodingFailed
             }
         case 401:
+            print("❌ [OffersSDK] Unauthorized")
             throw NetworkError.unauthorized
         case 403:
+            print("❌ [OffersSDK] Forbidden")
             throw NetworkError.forbidden
         default:
+            print("❌ [OffersSDK] Server returned: \(httpResponse.statusCode)")
             throw NetworkError.invalidResponse(httpResponse.statusCode)
         }
     }
     
     public func fetchOffers(page: Int) async throws -> OffersResponseDTO {
-        // Updated endpoint potentially? The previous one was just the base URL with query params.
-        // Assuming the base offers API still works similarly but might need the JWT now.
+        print("🚀 [OffersSDK] Fetching offers page: \(page)")
+        
         guard let url = URL(string: "\(baseURL)/?page=\(page)") else {
             throw NetworkError.invalidURL
         }
@@ -92,10 +112,10 @@ public final class OffersNetworkService: OffersNetworkServiceProtocol, @unchecke
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         
-        // If we have an access token, we use it. Otherwise fallback to API Key or specific logic.
         if let token = accessToken {
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         } else {
+            print("⚠️ [OffersSDK] No token found, using API Key for auth")
             request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         }
         
@@ -108,10 +128,15 @@ public final class OffersNetworkService: OffersNetworkServiceProtocol, @unchecke
                 throw NetworkError.requestFailed
             }
             
+            print("📥 [OffersSDK] FetchOffers Status Code: \(httpResponse.statusCode)")
+            
             switch httpResponse.statusCode {
             case 200...299:
-                return try JSONDecoder().decode(OffersResponseDTO.self, from: data)
+                let decoded = try JSONDecoder().decode(OffersResponseDTO.self, from: data)
+                print("✅ [OffersSDK] Fetched \(decoded.data.count) offers")
+                return decoded
             case 401:
+                print("❌ [OffersSDK] Offers Unauthorized")
                 throw NetworkError.unauthorized
             case 403:
                 throw NetworkError.forbidden
@@ -121,15 +146,10 @@ public final class OffersNetworkService: OffersNetworkServiceProtocol, @unchecke
                 throw NetworkError.invalidResponse(httpResponse.statusCode)
             }
             
-        } catch let error as URLError {
-            if error.code == .notConnectedToInternet {
-                throw NetworkError.offline
-            } else {
-                throw NetworkError.requestFailed
-            }
         } catch let error as NetworkError {
             throw error
         } catch {
+            print("❌ [OffersSDK] FetchOffers failed: \(error)")
             throw NetworkError.decodingFailed
         }
     }
