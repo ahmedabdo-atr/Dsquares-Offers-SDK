@@ -8,86 +8,98 @@ struct OfferCardView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Image Section with badges
+            // Image Section with better badges
             ZStack(alignment: .topTrailing) {
                 imageSection
                 
-                // Reward Type Badge
+                // Premium Badge
                 if let rewardType = offer.rewardType {
                     Text(rewardType)
-                        .font(DSTypography.small())
+                        .font(.system(size: 9, weight: .black))
                         .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(DSColor.primary)
-                        .cornerRadius(6)
-                        .padding(8)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(
+                            Capsule().fill(DSColor.primary)
+                                .shadow(color: DSColor.primary.opacity(0.4), radius: 5, x: 0, y: 3)
+                        )
+                        .padding(10)
                 }
                 
-                // Locked State Overlay
+                // Locked State Overlay with Glassmorphism
                 if offer.isLocked {
-                    ZStack {
-                        Color.black.opacity(0.4)
-                        Image(systemName: "lock.fill")
-                            .foregroundColor(.white)
-                            .font(.title2)
-                    }
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        .overlay(
+                            Image(systemName: "lock.fill")
+                                .foregroundColor(.white)
+                                .font(.title3)
+                                .shadow(radius: 5)
+                        )
                 }
             }
-            .frame(height: 140)
+            .frame(height: 150)
             .clipped()
             
             // Info Section
-            VStack(alignment: .leading, spacing: 8) {
-                VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
                     Text(offer.merchantName ?? "Merchant")
-                        .font(DSTypography.caption())
-                        .foregroundColor(DSColor.textSecondary)
-                        .textCase(.uppercase)
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(DSColor.primary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(DSColor.primary.opacity(0.1))
+                        .cornerRadius(6)
                     
-                    Text(offer.title)
-                        .font(DSTypography.subtitle())
-                        .foregroundColor(DSColor.textPrimary)
-                        .lineLimit(2)
-                        .frame(height: 40, alignment: .topLeading)
+                    Spacer()
                 }
                 
-                Spacer(minLength: 8)
+                Text(offer.title)
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundColor(DSColor.textPrimary)
+                    .lineLimit(2)
+                    .frame(height: 42, alignment: .topLeading)
                 
-                HStack {
-                    HStack(spacing: 4) {
-                        Image(systemName: "star.fill")
-                            .font(.system(size: 10))
-                            .foregroundColor(DSColor.accent)
-                        Text(offer.points ?? "0")
-                            .font(DSTypography.body().bold())
-                            .foregroundColor(DSColor.textPrimary)
-                        Text("pts")
-                            .font(DSTypography.caption())
+                HStack(alignment: .bottom) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("REDEEM FOR")
+                            .font(.system(size: 8, weight: .bold))
                             .foregroundColor(DSColor.textSecondary)
+                        
+                        HStack(spacing: 4) {
+                            Text(offer.points ?? "0")
+                                .font(.system(size: 18, weight: .black, design: .rounded))
+                                .foregroundColor(DSColor.textPrimary)
+                            Text("PTS")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(DSColor.textSecondary)
+                        }
                     }
                     
                     Spacer()
                     
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(DSColor.primary)
-                        .padding(6)
-                        .background(DSColor.primary.opacity(0.1))
-                        .clipShape(Circle())
+                    Circle()
+                        .fill(DSColor.primary)
+                        .frame(width: 28, height: 28)
+                        .overlay(
+                            Image(systemName: "arrow.right")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(.white)
+                        )
+                        .shadow(color: DSColor.primary.opacity(0.3), radius: 5, x: 0, y: 3)
                 }
             }
-            .padding(12)
+            .padding(14)
         }
         .background(DSColor.surface)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.06), radius: 10, x: 0, y: 4)
+        .cornerRadius(20)
+        .shadow(color: Color.black.opacity(0.08), radius: 15, x: 0, y: 8)
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(DSColor.border, lineWidth: 1)
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(DSColor.border.opacity(0.5), lineWidth: 1)
         )
         .scaleEffect(offer.isLocked ? 0.98 : 1.0)
-        .animation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0), value: offer.isLocked)
     }
     
     @ViewBuilder

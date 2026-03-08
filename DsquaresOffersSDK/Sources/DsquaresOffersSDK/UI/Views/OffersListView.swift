@@ -21,11 +21,12 @@ public struct OffersListView: View {
             DSColor.secondaryBackground.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Custom Navbar
+                // Custom Navbar with Glassmorphism
                 headerView
+                    .zIndex(10)
                 
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
+                    VStack(alignment: .leading, spacing: 24) {
                         // Search Section
                         searchBar
                         
@@ -38,7 +39,7 @@ public struct OffersListView: View {
                         // Offers Content
                         contentView
                     }
-                    .padding(.vertical, 16)
+                    .padding(.vertical, 20)
                 }
                 .refreshable {
                     await viewModel.fetchFirstPage()
@@ -58,96 +59,170 @@ public struct OffersListView: View {
     
     private var headerView: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Explore Offers")
-                    .font(DSTypography.title())
-                    .foregroundColor(DSColor.textPrimary)
-                Text("Find your favorite rewards")
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Dsquares")
+                    .font(.system(size: 24, weight: .black, design: .rounded))
+                    .foregroundColor(DSColor.primary)
+                Text("Exclusive Rewards")
                     .font(DSTypography.caption())
                     .foregroundColor(DSColor.textSecondary)
             }
             Spacer()
             
-            Button(action: {}) {
-                Image(systemName: "bell.badge")
-                    .font(.title3)
-                    .foregroundColor(DSColor.textPrimary)
-                    .padding(10)
-                    .background(DSColor.surface)
-                    .clipShape(Circle())
-                    .shadow(color: Color.black.opacity(0.05), radius: 5)
+            HStack(spacing: 16) {
+                Button(action: {}) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(DSColor.textPrimary)
+                }
+                
+                Button(action: {}) {
+                    ZStack(alignment: .topTrailing) {
+                        Image(systemName: "bell")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(DSColor.textPrimary)
+                        
+                        Circle()
+                            .fill(DSColor.primary)
+                            .frame(width: 8, height: 8)
+                            .offset(x: 2, y: -2)
+                    }
+                }
+                .padding(10)
+                .background(DSColor.surface)
+                .clipShape(Circle())
+                .shadow(color: Color.black.opacity(0.05), radius: 5)
             }
         }
         .padding(.horizontal)
-        .padding(.vertical, 12)
-        .background(DSColor.surface)
+        .padding(.top, 10)
+        .padding(.bottom, 15)
+        .background(
+            Rectangle()
+                .fill(DSColor.surface.opacity(0.8))
+                .background(.ultraThinMaterial)
+                .ignoresSafeArea(edges: .top)
+        )
+        .overlay(
+            Divider().opacity(0.5), alignment: .bottom
+        )
     }
     
     private var searchBar: some View {
-        HStack {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(DSColor.textSecondary)
-            TextField("Search for brands or items...", text: $searchText)
-                .font(DSTypography.body())
+        HStack(spacing: 12) {
+            Image(systemName: "line.3.horizontal.decrease.circle")
+                .font(.title3)
+                .foregroundColor(DSColor.primary)
+            
+            HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(DSColor.textSecondary)
+                TextField("Search brands...", text: $searchText)
+                    .font(DSTypography.body())
+            }
+            .padding(14)
+            .background(DSColor.surface)
+            .cornerRadius(15)
+            .shadow(color: Color.black.opacity(0.04), radius: 10, x: 0, y: 4)
         }
-        .padding(14)
-        .background(DSColor.surface)
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.03), radius: 5)
         .padding(.horizontal)
     }
     
     private var bannerView: some View {
         ZStack(alignment: .leading) {
-            RoundedRectangle(cornerRadius: 16)
-                .fill(LinearGradient(colors: [DSColor.primary, DSColor.primary.opacity(0.8)], startPoint: .leading, endPoint: .trailing))
+            RoundedRectangle(cornerRadius: 24)
+                .fill(
+                    LinearGradient(
+                        colors: [DSColor.primary, Color(hex: "FF4D67")],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .shadow(color: DSColor.primary.opacity(0.3), radius: 15, x: 0, y: 10)
+            
+            // Decorative shapes
+            Circle()
+                .fill(Color.white.opacity(0.1))
+                .frame(width: 150)
+                .offset(x: 200, y: -40)
             
             HStack {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Summer Deals!")
-                        .font(DSTypography.subtitle())
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Summer Rewards")
+                        .font(.system(size: 22, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
-                    Text("Get up to 50% discount on electronics items.")
+                    Text("Redeem your points for \nexclusive gift cards!")
                         .font(DSTypography.caption())
                         .foregroundColor(.white.opacity(0.9))
+                        .lineLimit(2)
+                    
+                    Button(action: {}) {
+                        Text("Explore Now")
+                            .font(.system(size: 12, weight: .bold))
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Color.white)
+                            .foregroundColor(DSColor.primary)
+                            .cornerRadius(20)
+                    }
+                    .padding(.top, 4)
                 }
                 Spacer()
-                Image(systemName: "bag.fill")
-                    .font(.system(size: 40))
-                    .foregroundColor(.white.opacity(0.3))
+                Image(systemName: "gift.fill")
+                    .font(.system(size: 60))
+                    .foregroundColor(.white.opacity(0.25))
+                    .rotationEffect(.degrees(-15))
             }
-            .padding(20)
+            .padding(24)
         }
-        .frame(height: 100)
+        .frame(height: 160)
         .padding(.horizontal)
     }
     
     private var categoriesScrollView: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Categories")
-                .font(DSTypography.subtitle())
-                .foregroundColor(DSColor.textPrimary)
-                .padding(.horizontal)
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Text("Categories")
+                    .font(DSTypography.subtitle())
+                    .foregroundColor(DSColor.textPrimary)
+                Spacer()
+            }
+            .padding(.horizontal)
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     ForEach(categories, id: \.self) { category in
-                        Button(action: { selectedCategory = category }) {
+                        Button(action: { 
+                            withAnimation(.spring()) {
+                                selectedCategory = category
+                            }
+                        }) {
                             Text(category)
-                                .font(DSTypography.caption().bold())
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 10)
-                                .background(selectedCategory == category ? DSColor.primary : DSColor.surface)
+                                .font(.system(size: 13, weight: .bold, design: .rounded))
+                                .padding(.horizontal, 22)
+                                .padding(.vertical, 12)
+                                .background(
+                                    ZStack {
+                                        if selectedCategory == category {
+                                            DSColor.primary
+                                                .matchedGeometryEffect(id: "cat", in: catNamespace)
+                                        } else {
+                                            DSColor.surface
+                                        }
+                                    }
+                                )
                                 .foregroundColor(selectedCategory == category ? .white : DSColor.textPrimary)
-                                .cornerRadius(25)
-                                .shadow(color: Color.black.opacity(selectedCategory == category ? 0.1 : 0.02), radius: 5)
+                                .cornerRadius(30)
+                                .shadow(color: Color.black.opacity(selectedCategory == category ? 0.2 : 0.03), radius: 8, x: 0, y: 4)
                         }
                     }
                 }
                 .padding(.horizontal)
+                .padding(.bottom, 5)
             }
         }
     }
+    @Namespace private var catNamespace
     
     private var contentView: some View {
         VStack(alignment: .leading, spacing: 12) {

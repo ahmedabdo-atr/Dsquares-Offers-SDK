@@ -11,92 +11,100 @@ public struct LoginView: View {
     
     public var body: some View {
         ZStack {
-            DSColor.background.ignoresSafeArea()
+            // Sophisticated Mesh-like Background
+            LinearGradient(colors: [DSColor.secondaryBackground, Color.white], startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
             
-            // Background Elements for premium look
+            // Abstract Background Shapes
             VStack {
                 Circle()
-                    .fill(DSColor.primary.opacity(0.05))
-                    .frame(width: 300, height: 300)
-                    .offset(x: -150, y: -100)
+                    .fill(DSColor.primary.opacity(0.04))
+                    .frame(width: 350, height: 350)
+                    .offset(x: -100, y: -150)
                 Spacer()
                 Circle()
-                    .fill(DSColor.primary.opacity(0.05))
-                    .frame(width: 200, height: 200)
+                    .fill(DSColor.primary.opacity(0.06))
+                    .frame(width: 300, height: 300)
                     .offset(x: 150, y: 100)
             }
             
-            VStack(spacing: 40) {
-                Spacer()
-                
-                // Welcome Section
-                VStack(spacing: 12) {
-                    Image(systemName: "person.circle.fill")
-                        .font(.system(size: 80))
-                        .foregroundColor(DSColor.primary)
-                        .background(
-                            Circle()
-                                .fill(Color.white)
-                                .shadow(color: Color.black.opacity(0.1), radius: 10)
-                        )
+            VStack(spacing: 0) {
+                // Brand Header Section
+                VStack(spacing: 24) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.white)
+                            .frame(width: 100, height: 100)
+                            .shadow(color: Color.black.opacity(0.05), radius: 15, x: 0, y: 10)
+                        
+                        Image(systemName: "gift.fill")
+                            .font(.system(size: 45))
+                            .foregroundColor(DSColor.primary)
+                    }
                     
                     VStack(spacing: 8) {
-                        Text("Welcome Back")
-                            .font(DSTypography.title())
+                        Text("Dsquares")
+                            .font(.system(size: 32, weight: .black, design: .rounded))
                             .foregroundColor(DSColor.textPrimary)
-                        
-                        Text("Please enter your phone number to continue exploring premium status and rewards.")
-                            .font(DSTypography.body())
-                            .foregroundColor(DSColor.textSecondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 40)
+                        Text("E X C L U S I V E S")
+                            .font(.system(size: 10, weight: .bold))
+                            .kerning(4)
+                            .foregroundColor(DSColor.primary)
                     }
                 }
+                .padding(.top, 60)
                 
-                // Input Section
-                VStack(alignment: .leading, spacing: 20) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Phone Number")
-                            .font(DSTypography.caption().bold())
+                Spacer()
+                
+                // Login Card (The Floating Look)
+                VStack(spacing: 32) {
+                    VStack(alignment: .leading, spacing: 20) {
+                        Text("Secure Login")
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
                             .foregroundColor(DSColor.textPrimary)
                         
-                        HStack(spacing: 12) {
-                            Image(systemName: "phone.fill")
+                        // Input Field with Prefix
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Mobile Number")
+                                .font(.system(size: 13, weight: .bold))
                                 .foregroundColor(DSColor.textSecondary)
-                                .font(.system(size: 16))
                             
-                            TextField("e.g. 010XXXXXXXX", text: $phoneNumber)
-                                .font(DSTypography.body())
-                                #if os(iOS)
-                                .keyboardType(.phonePad)
-                                #endif
+                            HStack(spacing: 12) {
+                                HStack(spacing: 6) {
+                                    Text("🇪🇬")
+                                    Text("+20")
+                                        .font(.system(size: 15, weight: .bold))
+                                }
+                                .padding(.trailing, 8)
+                                .overlay(
+                                    Rectangle().fill(DSColor.border).frame(width: 1).padding(.vertical, 4),
+                                    alignment: .trailing
+                                )
+                                
+                                TextField("10XXXXXXXX", text: $phoneNumber)
+                                    .font(.system(size: 16, weight: .semibold))
+                                    #if os(iOS)
+                                    .keyboardType(.phonePad)
+                                    #endif
+                            }
+                            .padding(18)
+                            .background(DSColor.secondaryBackground)
+                            .cornerRadius(16)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(viewModel.errorMessage != nil ? Color.red.opacity(0.5) : Color.clear, lineWidth: 1.5)
+                            )
                         }
-                        .padding(16)
-                        .background(DSColor.surface)
-                        .cornerRadius(12)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(viewModel.errorMessage != nil ? Color.red.opacity(0.5) : DSColor.border, lineWidth: 1)
-                        )
-                        .shadow(color: Color.black.opacity(0.02), radius: 5)
                     }
                     
                     if let error = viewModel.errorMessage {
-                        HStack(spacing: 4) {
-                            Image(systemName: "exclamationmark.circle.fill")
-                            Text(error)
-                        }
-                        .font(DSTypography.caption())
-                        .foregroundColor(.red)
-                        .padding(.horizontal, 4)
+                        Text(error)
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.red)
+                            .padding(.top, -15)
                     }
-                }
-                .padding(.horizontal, 24)
-                
-                Spacer()
-                
-                // Action Buttons
-                VStack(spacing: 16) {
+                    
+                    // Main Action Button
                     Button(action: {
                         Task {
                             await viewModel.login(userIdentifier: phoneNumber)
@@ -108,37 +116,38 @@ public struct LoginView: View {
                                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             } else {
                                 Text("Sign In")
+                                    .font(.system(size: 18, weight: .bold, design: .rounded))
                                 Image(systemName: "arrow.right")
+                                    .font(.system(size: 14, weight: .bold))
                             }
                         }
-                        .font(DSTypography.body().bold())
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
+                        .frame(height: 60)
                         .background(
-                            Group {
+                            ZStack {
                                 if phoneNumber.isEmpty || viewModel.isLoading {
-                                    Color.gray.opacity(0.4)
+                                    Color.gray.opacity(0.3)
                                 } else {
-                                    LinearGradient(colors: [DSColor.primary, DSColor.primary.opacity(0.85)], startPoint: .leading, endPoint: .trailing)
+                                    LinearGradient(
+                                        colors: [DSColor.primary, Color(hex: "FF4D67")],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
                                 }
                             }
                         )
-                        .cornerRadius(14)
-                        .shadow(color: DSColor.primary.opacity(phoneNumber.isEmpty ? 0 : 0.3), radius: 8, y: 4)
+                        .cornerRadius(18)
+                        .shadow(color: DSColor.primary.opacity(phoneNumber.isEmpty ? 0 : 0.3), radius: 12, x: 0, y: 6)
                     }
                     .disabled(viewModel.isLoading || phoneNumber.isEmpty)
-                    
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        Text("Maybe Later")
-                            .font(DSTypography.body().bold())
-                            .foregroundColor(DSColor.textSecondary)
-                    }
                 }
+                .padding(32)
+                .background(Color.white)
+                .cornerRadius(32)
+                .shadow(color: Color.black.opacity(0.08), radius: 30, x: 0, y: 15)
                 .padding(.horizontal, 24)
-                .padding(.bottom, 30)
+                .padding(.bottom, 40)
             }
         }
         .onReceive(viewModel.$isLoggedIn) { loggedIn in

@@ -111,21 +111,39 @@ public struct ItemDTO: Codable {
         case code, name, description, locked, rewardType, denominations, imageUrl
         // Extra keys for decoding
         case image_url, ImageUrl, RewardType, Locked, Code, Name, Description
+        case brand, Brand, Logo, logo, BrandLogo, brand_logo
     }
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        code = try (container.decodeIfPresent(String.self, forKey: .code) ?? container.decode(String.self, forKey: .Code))
-        name = try (container.decodeIfPresent(String.self, forKey: .name) ?? container.decode(String.self, forKey: .Name))
+        
+        // Flexible Code Loading
+        code = (try? container.decode(String.self, forKey: .code)) ?? 
+               (try? container.decode(String.self, forKey: .Code)) ?? ""
+        
+        // Flexible Name/Brand Loading
+        name = (try? container.decode(String.self, forKey: .name)) ?? 
+               (try? container.decode(String.self, forKey: .Name)) ?? 
+               (try? container.decode(String.self, forKey: .brand)) ?? 
+               (try? container.decode(String.self, forKey: .Brand)) ?? "Unknown Item"
+               
         description = (try? container.decodeIfPresent(String.self, forKey: .description)) ?? (try? container.decodeIfPresent(String.self, forKey: .Description))
         locked = (try? container.decode(Bool.self, forKey: .locked)) ?? (try? container.decode(Bool.self, forKey: .Locked)) ?? false
         rewardType = (try? container.decodeIfPresent(String.self, forKey: .rewardType)) ?? (try? container.decodeIfPresent(String.self, forKey: .RewardType))
         denominations = try container.decodeIfPresent([DenominationDTO].self, forKey: .denominations)
         
-        // Flexi-Image Loading
-        imageUrl = (try? container.decodeIfPresent(String.self, forKey: .imageUrl)) ?? 
-                   (try? container.decodeIfPresent(String.self, forKey: .image_url)) ?? 
-                   (try? container.decodeIfPresent(String.self, forKey: .ImageUrl))
+        // Flexible Image Loading
+        let rootImg = (try? container.decodeIfPresent(String.self, forKey: .imageUrl)) ?? 
+                      (try? container.decodeIfPresent(String.self, forKey: .image_url)) ?? 
+                      (try? container.decodeIfPresent(String.self, forKey: .ImageUrl))
+                      
+        let l1 = (try? container.decodeIfPresent(String.self, forKey: .logo))
+        let l2 = (try? container.decodeIfPresent(String.self, forKey: .Logo))
+        let l3 = (try? container.decodeIfPresent(String.self, forKey: .brand_logo))
+        let l4 = (try? container.decodeIfPresent(String.self, forKey: .BrandLogo))
+        let logoImg = l1 ?? l2 ?? l3 ?? l4
+                      
+        imageUrl = rootImg ?? logoImg
     }
     
     public func encode(to encoder: Encoder) throws {
@@ -142,7 +160,8 @@ public struct ItemDTO: Codable {
     // Mapping to Domain Entity
     func toDomain() -> Offer {
         let firstDenom = denominations?.first
-        let finalImageUrl = imageUrl ?? firstDenom?.imageUrl
+        let rawImageUrl = (imageUrl != nil && !imageUrl!.isEmpty) ? imageUrl : firstDenom?.imageUrl
+        let finalImageUrl = fixURL(rawImageUrl)
         
         return Offer(
             id: Int(code.replacingOccurrences(of: "b-", with: "")) ?? 0,
@@ -150,10 +169,22 @@ public struct ItemDTO: Codable {
             description: description,
             imageUrl: URL(string: finalImageUrl ?? ""),
             points: "\(firstDenom?.points ?? 0)",
-            merchantName: firstDenom?.brand,
+            merchantName: firstDenom?.brand ?? name,
             isLocked: locked,
             rewardType: rewardType
         )
+    }
+    
+    private func fixURL(_ urlString: String?) -> String? {
+        guard let urlString = urlString, !urlString.isEmpty else { return nil }
+        if urlString.hasPrefix("http") {
+            return urlString
+        }
+        let baseURL = "https://connect-api.dsquares.com"
+        if urlString.hasPrefix("/") {
+            return baseURL + urlString
+        }
+        return baseURL + "/" + urlString
     }
 }
 
