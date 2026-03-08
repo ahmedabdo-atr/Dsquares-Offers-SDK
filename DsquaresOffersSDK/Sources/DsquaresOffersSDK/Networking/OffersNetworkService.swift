@@ -103,54 +103,78 @@ public final class OffersNetworkService: OffersNetworkServiceProtocol, @unchecke
     }
     
     public func fetchOffers(page: Int) async throws -> OffersResponseDTO {
-        print("🚀 [OffersSDK] Fetching offers page: \(page)")
+        print("🚀 [OffersSDK] Fetching Items (Offers) page: \(page)")
         
-        guard let url = URL(string: "\(baseURL)/?page=\(page)") else {
+        guard let token = self.accessToken else {
+            print("❌ [OffersSDK] No token found for fetchItems")
+            throw NetworkError.unauthorized
+        }
+        
+        guard let url = URL(string: "\(baseURL)/api/DynamicApp/v1/Integration/Items") else {
             throw NetworkError.invalidURL
         }
         
         var request = URLRequest(url: url)
-        request.httpMethod = "GET"
+        request.httpMethod = "POST" // Documentation says POST for Items
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("application/json", forHTTPHeaderField: "Accept")
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.addValue(apiKey, forHTTPHeaderField: "x-api-key")
         
-        if let token = accessToken {
-            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else {
-            print("⚠️ [OffersSDK] No token found, using API Key for auth")
-            request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        // Build the request body as per documentation
+        let body = ItemsRequestDTO(page: page, pageSize: 10)
+        do {
+            request.httpBody = try JSONEncoder().encode(body)
+            if let bodyString = String(data: request.httpBody!, encoding: .utf8) {
+                print("📤 [OffersSDK] Items Request Body: \(bodyString)")
+            }
+        } catch {
+            print("❌ [OffersSDK] Failed to encode Items request")
+            throw NetworkError.decodingFailed
         }
         
-        request.addValue("application/json", forHTTPHeaderField: "Accept")
+        let (data, response) = try await URLSession.shared.data(for: request)
         
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            
-            guard let httpResponse = response as? HTTPURLResponse else {
-                throw NetworkError.requestFailed
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkError.requestFailed
+        }
+        
+        print("📥 [OffersSDK] Items Status Code: \(httpResponse.statusCode)")
+        
+        if httpResponse.statusCode == 200 {
+            do {
+                let itemsResponse = try JSONDecoder().decode(ItemsResponseDTO.self, from: data)
+                
+                // Map ItemsResponseDTO to the legacy OffersResponseDTO to keep existing logic working
+                // Or we can refactor the whole chain, but mapping is safer for now.
+                let legacyOffers = itemsResponse.result?.items.map { item -> OfferDTO in
+                    return OfferDTO(
+                        id: item.toDomain().id,
+                        title: item.name,
+                        description: item.description,
+                        imageUrl: item.imageUrl,
+                        brandName: item.denominations?.first?.brand,
+                        brandLogo: nil,
+                        expiryDate: nil
+                    )
+                } ?? []
+                
+                print("✅ [OffersSDK] Successfully fetched \(legacyOffers.count) items")
+                return OffersResponseDTO(
+                    data: legacyOffers,
+                    totalCount: itemsResponse.result?.totalItems,
+                    currentPage: page,
+                    totalPages: itemsResponse.result?.totalPages
+                )
+            } catch {
+                print("❌ [OffersSDK] Items decoding failed: \(error)")
+                throw NetworkError.decodingFailed
             }
-            
-            print("📥 [OffersSDK] FetchOffers Status Code: \(httpResponse.statusCode)")
-            
-            switch httpResponse.statusCode {
-            case 200...299:
-                let decoded = try JSONDecoder().decode(OffersResponseDTO.self, from: data)
-                print("✅ [OffersSDK] Fetched \(decoded.data.count) offers")
-                return decoded
-            case 401:
-                print("❌ [OffersSDK] Offers Unauthorized")
-                throw NetworkError.unauthorized
-            case 403:
-                throw NetworkError.forbidden
-            case 500...599:
-                throw NetworkError.serverError
-            default:
-                throw NetworkError.invalidResponse(httpResponse.statusCode)
+        } else {
+            if let errorMsg = String(data: data, encoding: .utf8) {
+                print("❌ [OffersSDK] Items Error Body: \(errorMsg)")
             }
-            
-        } catch let error as NetworkError {
-            throw error
-        } catch {
-            print("❌ [OffersSDK] FetchOffers failed: \(error)")
-            throw NetworkError.decodingFailed
+            throw NetworkError.invalidResponse(httpResponse.statusCode)
         }
     }
 }

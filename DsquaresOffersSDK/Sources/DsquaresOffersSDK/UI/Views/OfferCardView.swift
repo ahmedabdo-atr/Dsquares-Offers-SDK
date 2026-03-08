@@ -1,12 +1,7 @@
-//
-//  OfferCardView.swift
-//  DsquaresOffersSDK
-//
-//  Created by Ahmad A. on 02/03/2026.
-//
-
 import SwiftUI
+#if canImport(UIKit)
 import UIKit
+#endif
 
 struct OfferCardView: View {
     let offer: Offer
@@ -43,19 +38,9 @@ struct OfferCardView: View {
                         .fill(DSColor.secondaryBackground)
                         .frame(height: 120)
                 }
-                
-                // Overlay for "locked" status if needed (mocked based on Figma)
-                if offer.id % 2 == 0 { // Just as a mock for the demo
-                    Image(systemName: "lock.fill")
-                        .foregroundColor(.white)
-                        .padding(8)
-                        .background(Color.black.opacity(0.6))
-                        .clipShape(Circle())
-                        .padding(8)
-                }
             }
             .frame(height: 120)
-            .cornerRadius(8, corners: [.topLeft, .topRight])
+            .cornerRadius(8) // Simplified for cross-platform compatibility
             
             // Info Section
             VStack(alignment: .leading, spacing: 4) {
@@ -64,43 +49,21 @@ struct OfferCardView: View {
                     .foregroundColor(DSColor.textPrimary)
                     .lineLimit(1)
                 
-                Text(offer.merchantName ?? "Merchent Name")
+                Text(offer.merchantName ?? "Merchant")
                     .font(.system(size: 12))
                     .foregroundColor(DSColor.textSecondary)
                 
                 HStack(spacing: 2) {
-                    Text("من") // From (Arabic)
-                        .font(.system(size: 10))
-                        .foregroundColor(DSColor.textSecondary)
-                    
-                    Text("\(offer.points ?? "5,000") نقطة") // XXX points
+                    Text("\(offer.points ?? "0") pts")
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(DSColor.textPrimary)
                 }
-                .environment(\.layoutDirection, .rightToLeft)
             }
             .padding(10)
-            .frame(maxWidth: .infinity, alignment: .trailing)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .background(DSColor.background)
         .cornerRadius(8)
         .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
-    }
-}
-
-// Utility to round specific corners
-extension View {
-    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
-        clipShape(RoundedCorner(radius: radius, corners: corners))
-    }
-}
-
-struct RoundedCorner: Shape {
-    var radius: CGFloat = .infinity
-    var corners: UIRectCorner = .allCorners
-
-    func path(in rect: CGRect) -> Path {
-        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
-        return Path(path.cgPath)
     }
 }
