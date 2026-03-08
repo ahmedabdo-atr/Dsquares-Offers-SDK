@@ -11,47 +11,112 @@ struct ContentView: View {
     @State private var showLogin = false
     @State private var showOffers = false
     
+    // Brand Colors
+    private let primaryRed = Color(red: 225/255, green: 25/255, blue: 55/255)
+    private let secondaryRed = Color(red: 255/255, green: 77/255, blue: 103/255)
+    
     var body: some View {
         NavigationView {
-            VStack(spacing: 30) {
-                Image(systemName: "gift.fill")
-                    .font(.system(size: 80))
-                    .foregroundColor(.red)
+            ZStack {
+                // Background color & decorative circles
+                Color.white.ignoresSafeArea()
                 
-                Text("Welcome to Host App")
-                    .font(.system(size: 34, weight: .bold))
-                
-                Text("This app integrates the Dsquares SDK seamlessly.")
-                    .font(.system(size: 16))
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-                
-                Button(action: {
-                    showLogin = true
-                }) {
-                    Text("View Exclusive Offers")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.white)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color(red: 0/255, green: 132/255, blue: 255/255)) // Brand Blue
-                        .cornerRadius(12)
-                        .padding(.horizontal, 40)
+                VStack {
+                    Circle()
+                        .fill(primaryRed.opacity(0.04))
+                        .frame(width: 400, height: 400)
+                        .offset(x: -150, y: -100)
+                    Spacer()
+                    Circle()
+                        .fill(primaryRed.opacity(0.06))
+                        .frame(width: 300, height: 300)
+                        .offset(x: 180, y: 150)
                 }
                 
-                // Navigation link to offers (hidden, triggered by state)
-                NavigationLink(destination: OffersSDKManager.createOffersScreen(), isActive: $showOffers) {
-                    EmptyView()
+                VStack(spacing: 0) {
+                    Spacer()
+                    
+                    // Hero Section
+                    VStack(spacing: 40) {
+                        // Premium Gift Icon with layers
+                        ZStack {
+                            Circle()
+                                .fill(primaryRed.opacity(0.1))
+                                .frame(width: 180, height: 180)
+                                .scaleEffect(1.1)
+                            
+                            Image(systemName: "gift.fill")
+                                .font(.system(size: 85))
+                                .foregroundColor(primaryRed)
+                                .shadow(color: primaryRed.opacity(0.3), radius: 25, x: 0, y: 15)
+                        }
+                        
+                        VStack(spacing: 16) {
+                            Text("Experience Rewards")
+                                .font(.system(size: 34, weight: .black, design: .rounded))
+                                .foregroundColor(Color(red: 26/255, green: 28/255, blue: 30/255))
+                                .multilineTextAlignment(.center)
+                            
+                            Text("Discover a world of exclusive offers and loyalty rewards with the Dsquares SDK integration.")
+                                .font(.system(size: 16, weight: .medium, design: .rounded))
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .lineSpacing(6)
+                                .padding(.horizontal, 40)
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    // Action Section
+                    VStack(spacing: 20) {
+                        Button(action: {
+                            showLogin = true
+                        }) {
+                            HStack {
+                                Text("Explore Exclusive Offers")
+                                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 14, weight: .heavy))
+                            }
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 65)
+                            .background(
+                                LinearGradient(
+                                    colors: [primaryRed, secondaryRed],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .cornerRadius(22)
+                            .shadow(color: primaryRed.opacity(0.4), radius: 15, x: 0, y: 8)
+                        }
+                        .padding(.horizontal, 30)
+                        
+                        Text("Powered by Dsquares Integration")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.secondary.opacity(0.6))
+                            .kerning(1)
+                    }
+                    .padding(.bottom, 40)
+                    
+                    // Navigation link to offers
+                    NavigationLink(destination: OffersSDKManager.createOffersScreen(), isActive: $showOffers) {
+                        EmptyView()
+                    }
                 }
             }
+            .navigationBarHidden(true)
             .sheet(isPresented: $showLogin, onDismiss: {
-                // For demo purposes, we assume success or check a shared state
-                // In a real app, user might have a callback or observe a manager
+                // In this demo flow, we navigate to offers after login sheet
                 showOffers = true 
             }) {
                 OffersSDKManager.createLoginScreen()
             }
         }
+        #if os(iOS)
+        .navigationViewStyle(StackNavigationViewStyle())
+        #endif
     }
 }
