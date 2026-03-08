@@ -41,15 +41,12 @@ public final class OffersNetworkService: OffersNetworkServiceProtocol, @unchecke
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
-        // Mandatory Dsquares headers to identify the caller and brand
+        // Exact headers used in the successful manual test (Apidog)
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
         request.addValue(apiKey, forHTTPHeaderField: "x-api-key")
-        request.addValue("IOS", forHTTPHeaderField: "Source")     // Mandatory for Dsquares
-        request.addValue("1", forHTTPHeaderField: "Brand-Id")    // Mandatory for Dsquares
-        request.addValue("en/ar", forHTTPHeaderField: "Accept-Language")
         
-        // Using the DTO which generates lowercase "userIdentifier"
+        // Using the updated DTO which wraps the identifier in a "data" object as required
         let body = LoginRequestDTO(userIdentifier: userIdentifier)
         do {
             request.httpBody = try JSONEncoder().encode(body)

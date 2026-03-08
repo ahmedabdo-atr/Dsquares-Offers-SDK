@@ -12,7 +12,7 @@ import SwiftUI
 public struct OffersSDKManager {
     
     /// Set this to true to use mock data instead of live API (useful for testing when IP is not whitelisted)
-    private static let useMock = true // ⚠️ Change to false for Production
+    private static let useMock = false // ✅ Changed to false as API is now working
     
     private static func getNetworkService() -> OffersNetworkServiceProtocol {
         return useMock ? MockOffersNetworkService() : OffersNetworkService()

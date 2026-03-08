@@ -19,17 +19,19 @@ public final class MockOffersNetworkService: OffersNetworkServiceProtocol, @unch
         
         // Mock successful login response
         let tokenResult = TokenResultDTO(
-            tokenType: "Bearer",
+            tokenType: "JWT",
             accessToken: "mock_jwt_token_for_testing",
-            expiresIn: 3600,
+            expiresInMins: 60,
             refreshToken: "mock_refresh_token"
         )
         
         let response = LoginResponseDTO(
             result: tokenResult,
-            message: "Success",
+            message: "Request completed successfully",
             statusCode: 1,
-            statusName: "OK"
+            statusName: "Success",
+            referenceCode: nil,
+            errors: nil
         )
         
         self.accessToken = tokenResult.accessToken
