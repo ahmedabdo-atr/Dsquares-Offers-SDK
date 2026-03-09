@@ -1,46 +1,73 @@
-# Dsquares Offers SDK & Host Application
+# 🎁 Dsquares Offers SDK & Host App
 
-This repository contains a professional-grade Native Mobile SDK for fetching and displaying merchant offers, along with a Host Application demonstrating its seamless integration. The project is designed strictly following iOS best practices, focusing on modularity, clean architecture, and high UI/UX fidelity.
+A premium, modular Native iOS SDK built for seamless integration of loyalty rewards and merchant offers. This repository includes both the core **DsquaresOffersSDK** and a **Host Application** that showcases a high-fidelity user experience.
 
-## Architecture Overview
+---
 
-The solution follows a modular strategy, separating core logic from the user interface:
+## 🚀 Key Features
 
-- **DsquaresOffersSDK:** A standalone Swift Package implementing the core rewards and loyalty logic. It follows Clean Architecture principles with clearly defined Layers (Data, Domain, Presentation).
-- **OffersHostApp:** A lightweight demonstration application that integrates the SDK through a dedicated abstraction layer.
+- **💎 Elite UI/UX**: Modern design language featuring glassmorphism, smooth gradients, and a "Floating Card" login interface.
+- **🔌 Plug & Play**: Fully decoupled Swift Package designed for effortless integration into any iOS project.
+- **⚡️ Performance Driven**: Native `async/await` networking with optimized JSON parsing and smart pagination.
+- **🏗️ Clean Architecture**: Strictly follows SOLID principles with clearly separated Domain, Data, and Presentation layers.
+- **📱 Responsive States**: Built-in handling for all view states: `Loading`, `Empty`, `Error`, and `Loaded`.
 
-### Key Technical Pillars:
-- **Presentation:** Built entirely with SwiftUI, utilizing the MVVM pattern. ViewModels manage internal states (Loading, Error, Loaded) using advanced state management.
-- **Networking:** A robust, protocol-oriented networking layer using Swift's native `async/await`. It features flexible JSON decoding to handle diverse API response structures.
-- **Modularity:** The SDK is completely isolated, exposing only necessary interfaces to ensure plug-and-play capability.
+---
 
-## Setup & Build Instructions
+## 🛠 Tech Stack & Architecture
 
-1. **Clone the repository:**
+The project is architected to be scalable and maintainable, avoiding "spaghetti" code while maintaining high performance.
+
+- **UI Framework**: SwiftUI 5.0+
+- **Pattern**: MVVM (Model-View-ViewModel) + Clean Architecture.
+- **Networking**: Protocol-oriented `URLSession` with structured concurrency.
+- **Dependency Management**: Swift Package Manager (SPM).
+- **Minimum iOS**: 15.0
+
+### Project Structure
+- 📦 **DsquaresOffersSDK**: The core engine. Logic-heavy but interface-light.
+- 📱 **OffersHostApp**: A lightweight shell demonstrating how to consume the SDK's entry points.
+
+---
+
+## ⚙️ Quick Start
+
+1. **Clone the Repo**
    ```bash
    git clone https://github.com/ahmedabdo-atr/Dsquares-Offers-SDK.git
    ```
-2. **Open the Workspace:**
-   Open `DsquaresOffersWorkspace.xcworkspace` in Xcode. (Ensure you open the workspace to maintain package links).
-3. **Run the Application:**
-   Select the `OffersHostApp` target and a simulator (iOS 15.0+), then press `Cmd + R`.
 
-## SDK Integration
+2. **Open the Project**
+   Launch `DsquaresOffersWorkspace.xcworkspace` in Xcode. (Always use the workspace to ensure SPM links are resolved).
 
-Integrating the SDK is straightforward. The recommended approach is to use the `OffersSDKManager` abstraction:
+3. **Run it**
+   Select the `OffersHostApp` target and hit `Cmd + R` on any iOS 15+ simulator.
+
+---
+
+## 🧩 Integration Guide
+
+Integrating the offers screen into your app is a one-liner thanks to our `OffersSDKManager` abstraction:
 
 ```swift
 import DsquaresOffersSDK
 
-// In your Host App
-OffersSDKManager.createOffersScreen()
+// Inside your SwiftUI View or Coordinator
+let offersView = OffersSDKManager.createOffersScreen()
 ```
 
-## Features
+For the authentication flow:
+```swift
+let loginView = OffersSDKManager.createLoginScreen()
+```
 
-- **Premium UI:** High-end design with glassmorphism, gradients, and a modern "Floating Card" login interface.
-- **Smart Data Fetching:** Supports pagination and pull-to-refresh for an optimal user experience.
-- **Robustness:** Comprehensive error handling and state feedback for offline or server-side issues.
-- **Modularity:** Low coupling with the host app, making it easy to drop into any existing project.
+---
 
-Ahmad A. 09/03/2026.
+## 👷 Author
+
+**Ahmad A.**  
+*Senior iOS Developer*  
+📅 *Last Updated: March 2026*
+
+---
+*Developed with ❤️ for a world-class rewards experience.*
