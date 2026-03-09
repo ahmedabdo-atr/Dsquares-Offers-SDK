@@ -109,7 +109,7 @@ public struct ItemDTO: Codable {
     
     enum CodingKeys: String, CodingKey {
         case code, name, description, locked, rewardType, denominations, imageUrl
-        case image_url, ImageUrl, RewardType, Locked, Code, Name, Description
+        case image_url, ImageUrl, RewardType, Locked, Code, Name, Description, Denominations
         case brand, Brand, Logo, logo, BrandLogo, brand_logo
     }
     
@@ -129,7 +129,10 @@ public struct ItemDTO: Codable {
         description = (try? container.decodeIfPresent(String.self, forKey: .description)) ?? (try? container.decodeIfPresent(String.self, forKey: .Description))
         locked = (try? container.decode(Bool.self, forKey: .locked)) ?? (try? container.decode(Bool.self, forKey: .Locked)) ?? false
         rewardType = (try? container.decodeIfPresent(String.self, forKey: .rewardType)) ?? (try? container.decodeIfPresent(String.self, forKey: .RewardType))
-        denominations = try container.decodeIfPresent([DenominationDTO].self, forKey: .denominations)
+        
+        var decodedDenoms: [DenominationDTO]? = try? container.decodeIfPresent([DenominationDTO].self, forKey: .denominations)
+        if decodedDenoms == nil { decodedDenoms = try? container.decodeIfPresent([DenominationDTO].self, forKey: .Denominations) }
+        denominations = decodedDenoms
         
         var rootImg: String? = try? container.decodeIfPresent(String.self, forKey: .imageUrl)
         if rootImg == nil { rootImg = try? container.decodeIfPresent(String.self, forKey: .image_url) }
@@ -159,8 +162,11 @@ public struct ItemDTO: Codable {
         let rawImageUrl = (imageUrl != nil && !imageUrl!.isEmpty) ? imageUrl : firstDenom?.imageUrl
         let finalImageUrl = fixURL(rawImageUrl)
         
+        let numericCode = code.filter { $0.isNumber }
+        let offerId = Int(numericCode) ?? 0
+        
         return Offer(
-            id: Int(code.replacingOccurrences(of: "b-", with: "")) ?? 0,
+            id: offerId,
             title: name,
             description: description,
             imageUrl: URL(string: finalImageUrl ?? ""),
@@ -206,6 +212,7 @@ public struct DenominationDTO: Codable {
     enum CodingKeys: String, CodingKey {
         case brand, code, name, value, categories, inStock, termsAndConditions, usageInstructions, from, to, description, denominationType, redemptionChannel, imageUrl, redemptionFactor, points, discount
         case image_url, ImageUrl, InStock, Description, Points, Brand, Code, Name, Value
+        case TermsAndConditions, UsageInstructions, DenominationType, RedemptionChannel, RedemptionFactor, Discount
     }
     
     public init(from decoder: Decoder) throws {
@@ -216,16 +223,20 @@ public struct DenominationDTO: Codable {
         value = (try? container.decodeIfPresent(Double.self, forKey: .value)) ?? (try? container.decodeIfPresent(Double.self, forKey: .Value))
         categories = try? container.decodeIfPresent([String].self, forKey: .categories)
         inStock = (try? container.decodeIfPresent(Bool.self, forKey: .inStock)) ?? (try? container.decodeIfPresent(Bool.self, forKey: .InStock))
-        termsAndConditions = try? container.decodeIfPresent(String.self, forKey: .termsAndConditions)
-        usageInstructions = try? container.decodeIfPresent(String.self, forKey: .usageInstructions)
+        
+        termsAndConditions = (try? container.decodeIfPresent(String.self, forKey: .termsAndConditions)) ?? (try? container.decodeIfPresent(String.self, forKey: .TermsAndConditions))
+        usageInstructions = (try? container.decodeIfPresent(String.self, forKey: .usageInstructions)) ?? (try? container.decodeIfPresent(String.self, forKey: .UsageInstructions))
+        
         from = try? container.decodeIfPresent(Double.self, forKey: .from)
         to = try? container.decodeIfPresent(Double.self, forKey: .to)
         description = (try? container.decodeIfPresent(String.self, forKey: .description)) ?? (try? container.decodeIfPresent(String.self, forKey: .Description))
-        denominationType = try? container.decodeIfPresent(String.self, forKey: .denominationType)
-        redemptionChannel = try? container.decodeIfPresent(String.self, forKey: .redemptionChannel)
-        redemptionFactor = try? container.decodeIfPresent(Double.self, forKey: .redemptionFactor)
+        
+        denominationType = (try? container.decodeIfPresent(String.self, forKey: .denominationType)) ?? (try? container.decodeIfPresent(String.self, forKey: .DenominationType))
+        redemptionChannel = (try? container.decodeIfPresent(String.self, forKey: .redemptionChannel)) ?? (try? container.decodeIfPresent(String.self, forKey: .RedemptionChannel))
+        redemptionFactor = (try? container.decodeIfPresent(Double.self, forKey: .redemptionFactor)) ?? (try? container.decodeIfPresent(Double.self, forKey: .RedemptionFactor))
+        
         points = (try? container.decodeIfPresent(Int.self, forKey: .points)) ?? (try? container.decodeIfPresent(Int.self, forKey: .Points))
-        discount = try? container.decodeIfPresent(String.self, forKey: .discount)
+        discount = (try? container.decodeIfPresent(String.self, forKey: .discount)) ?? (try? container.decodeIfPresent(String.self, forKey: .Discount))
         
         var decodedImageUrl: String? = try? container.decodeIfPresent(String.self, forKey: .imageUrl)
         if decodedImageUrl == nil { decodedImageUrl = try? container.decodeIfPresent(String.self, forKey: .image_url) }
