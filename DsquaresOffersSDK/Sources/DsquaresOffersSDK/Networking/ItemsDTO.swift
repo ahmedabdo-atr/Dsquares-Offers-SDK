@@ -42,10 +42,12 @@ public struct ItemsResponseDTO: Codable {
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        result = (try? container.decodeIfPresent(ItemsResult.self, forKey: .result)) ?? 
-                 (try? container.decodeIfPresent(ItemsResult.self, forKey: .data)) ?? 
-                 (try? container.decodeIfPresent(ItemsResult.self, forKey: .Data)) ?? 
-                 (try? container.decodeIfPresent(ItemsResult.self, forKey: .Result))
+        
+        var decodedResult: ItemsResult? = try? container.decodeIfPresent(ItemsResult.self, forKey: .result)
+        if decodedResult == nil { decodedResult = try? container.decodeIfPresent(ItemsResult.self, forKey: .data) }
+        if decodedResult == nil { decodedResult = try? container.decodeIfPresent(ItemsResult.self, forKey: .Data) }
+        if decodedResult == nil { decodedResult = try? container.decodeIfPresent(ItemsResult.self, forKey: .Result) }
+        result = decodedResult
         
         message = (try? container.decodeIfPresent(String.self, forKey: .message)) ?? (try? container.decodeIfPresent(String.self, forKey: .Message))
         statusCode = try (container.decodeIfPresent(Int.self, forKey: .statusCode) ?? container.decode(Int.self, forKey: .StatusCode))
@@ -114,27 +116,29 @@ public struct ItemDTO: Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        code = (try? container.decode(String.self, forKey: .code)) ?? 
-               (try? container.decode(String.self, forKey: .Code)) ?? ""
+        let decodedCode = (try? container.decode(String.self, forKey: .code)) ?? 
+                         (try? container.decode(String.self, forKey: .Code))
+        code = decodedCode ?? ""
         
-        name = (try? container.decode(String.self, forKey: .name)) ?? 
-               (try? container.decode(String.self, forKey: .Name)) ?? 
-               (try? container.decode(String.self, forKey: .brand)) ?? 
-               (try? container.decode(String.self, forKey: .Brand)) ?? "Unknown Item"
+        var decodedName: String? = try? container.decode(String.self, forKey: .name)
+        if decodedName == nil { decodedName = try? container.decode(String.self, forKey: .Name) }
+        if decodedName == nil { decodedName = try? container.decode(String.self, forKey: .brand) }
+        if decodedName == nil { decodedName = try? container.decode(String.self, forKey: .Brand) }
+        name = decodedName ?? "Unknown Item"
                
         description = (try? container.decodeIfPresent(String.self, forKey: .description)) ?? (try? container.decodeIfPresent(String.self, forKey: .Description))
         locked = (try? container.decode(Bool.self, forKey: .locked)) ?? (try? container.decode(Bool.self, forKey: .Locked)) ?? false
         rewardType = (try? container.decodeIfPresent(String.self, forKey: .rewardType)) ?? (try? container.decodeIfPresent(String.self, forKey: .RewardType))
         denominations = try container.decodeIfPresent([DenominationDTO].self, forKey: .denominations)
         
-        let rootImg = (try? container.decodeIfPresent(String.self, forKey: .imageUrl)) ?? 
-                      (try? container.decodeIfPresent(String.self, forKey: .image_url)) ?? 
-                      (try? container.decodeIfPresent(String.self, forKey: .ImageUrl))
+        var rootImg: String? = try? container.decodeIfPresent(String.self, forKey: .imageUrl)
+        if rootImg == nil { rootImg = try? container.decodeIfPresent(String.self, forKey: .image_url) }
+        if rootImg == nil { rootImg = try? container.decodeIfPresent(String.self, forKey: .ImageUrl) }
                       
-        let logoImg = (try? container.decodeIfPresent(String.self, forKey: .logo)) ?? 
-                      (try? container.decodeIfPresent(String.self, forKey: .Logo)) ?? 
-                      (try? container.decodeIfPresent(String.self, forKey: .brand_logo)) ?? 
-                      (try? container.decodeIfPresent(String.self, forKey: .BrandLogo))
+        var logoImg: String? = try? container.decodeIfPresent(String.self, forKey: .logo)
+        if logoImg == nil { logoImg = try? container.decodeIfPresent(String.self, forKey: .Logo) }
+        if logoImg == nil { logoImg = try? container.decodeIfPresent(String.self, forKey: .brand_logo) }
+        if logoImg == nil { logoImg = try? container.decodeIfPresent(String.self, forKey: .BrandLogo) }
                       
         imageUrl = rootImg ?? logoImg
     }
@@ -223,9 +227,10 @@ public struct DenominationDTO: Codable {
         points = (try? container.decodeIfPresent(Int.self, forKey: .points)) ?? (try? container.decodeIfPresent(Int.self, forKey: .Points))
         discount = try? container.decodeIfPresent(String.self, forKey: .discount)
         
-        imageUrl = (try? container.decodeIfPresent(String.self, forKey: .imageUrl)) ?? 
-                   (try? container.decodeIfPresent(String.self, forKey: .image_url)) ?? 
-                   (try? container.decodeIfPresent(String.self, forKey: .ImageUrl))
+        var decodedImageUrl: String? = try? container.decodeIfPresent(String.self, forKey: .imageUrl)
+        if decodedImageUrl == nil { decodedImageUrl = try? container.decodeIfPresent(String.self, forKey: .image_url) }
+        if decodedImageUrl == nil { decodedImageUrl = try? container.decodeIfPresent(String.self, forKey: .ImageUrl) }
+        imageUrl = decodedImageUrl
     }
     
     public func encode(to encoder: Encoder) throws {
