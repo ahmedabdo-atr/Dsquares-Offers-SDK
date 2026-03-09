@@ -2,23 +2,22 @@
 //  ContentView.swift
 //  OffersHostApp
 //
-//  Created by Ahmed A. on 01/03/2026.
+//  Created by Ahmad A. on 09/03/2026.
 //
 
 import SwiftUI
+import DsquaresOffersSDK
 
 struct ContentView: View {
     @State private var showLogin = false
     @State private var showOffers = false
     
-    // Brand Colors
     private let primaryRed = Color(red: 225/255, green: 25/255, blue: 55/255)
     private let secondaryRed = Color(red: 255/255, green: 77/255, blue: 103/255)
     
     var body: some View {
         NavigationView {
             ZStack {
-                // Background color & decorative circles
                 Color.white.ignoresSafeArea()
                 
                 VStack {
@@ -36,9 +35,7 @@ struct ContentView: View {
                 VStack(spacing: 0) {
                     Spacer()
                     
-                    // Hero Section
                     VStack(spacing: 40) {
-                        // Premium Gift Icon with layers
                         ZStack {
                             Circle()
                                 .fill(primaryRed.opacity(0.1))
@@ -68,7 +65,6 @@ struct ContentView: View {
                     
                     Spacer()
                     
-                    // Action Section
                     VStack(spacing: 20) {
                         Button(action: {
                             showLogin = true
@@ -101,7 +97,6 @@ struct ContentView: View {
                     }
                     .padding(.bottom, 40)
                     
-                    // Navigation link to offers
                     NavigationLink(destination: OffersSDKManager.createOffersScreen(), isActive: $showOffers) {
                         EmptyView()
                     }
@@ -109,7 +104,6 @@ struct ContentView: View {
             }
             .navigationBarHidden(true)
             .sheet(isPresented: $showLogin, onDismiss: {
-                // In this demo flow, we navigate to offers after login sheet
                 showOffers = true 
             }) {
                 OffersSDKManager.createLoginScreen()

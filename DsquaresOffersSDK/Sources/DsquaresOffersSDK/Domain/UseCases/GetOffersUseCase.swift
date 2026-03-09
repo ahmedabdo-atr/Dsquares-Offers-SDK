@@ -2,13 +2,11 @@
 //  GetOffersUseCase.swift
 //  DsquaresOffersSDK
 //
-//  Created by Ahmad A. on 02/03/2026.
+//  Created by Ahmad A. on 09/03/2026.
 //
 
 import Foundation
 
-/// Use case to fetch paginated offers.
-/// Encapsulates the business logic for retrieving offers.
 public protocol GetOffersUseCaseProtocol: Sendable {
     func execute(page: Int) async throws -> [Offer]
 }

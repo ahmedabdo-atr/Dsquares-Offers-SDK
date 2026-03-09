@@ -2,23 +2,18 @@
 //  DsquaresOffersSDK.swift
 //  DsquaresOffersSDK
 //
-//  Created by Ahmad A. on 02/03/2026.
+//  Created by Ahmad A. on 09/03/2026.
 //
 
 import SwiftUI
 
-/// Public interface for the Dsquares Offers SDK.
-/// The host application should interact with the SDK primarily through this manager.
 public struct OffersSDKManager {
-    
-    /// Set this to true to use mock data instead of live API (useful for testing when IP is not whitelisted)
-    private static let useMock = false // ✅ Changed to false as API is now working
+    private static let useMock = false
     
     private static func getNetworkService() -> OffersNetworkServiceProtocol {
         return useMock ? MockOffersNetworkService.shared : OffersNetworkService.shared
     }
     
-    /// Entry point to create the Offers List screen.
     @MainActor
     public static func createOffersScreen() -> some View {
         let networkService = getNetworkService()
@@ -29,7 +24,6 @@ public struct OffersSDKManager {
         return OffersListView(viewModel: viewModel)
     }
     
-    /// Entry point to create the Login screen.
     @MainActor
     public static func createLoginScreen() -> some View {
         let networkService = getNetworkService()

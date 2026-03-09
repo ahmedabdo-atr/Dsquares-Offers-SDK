@@ -2,13 +2,12 @@
 //  MockOffersNetworkService.swift
 //  DsquaresOffersSDK
 //
-//  Created by Ahmad A. on 02/03/2026.
+//  Created by Ahmad A. on 09/03/2026.
 //
 
 import Foundation
 
 public final class MockOffersNetworkService: OffersNetworkServiceProtocol, @unchecked Sendable {
-    
     public static let shared = MockOffersNetworkService()
     
     private var accessToken: String?
@@ -16,10 +15,8 @@ public final class MockOffersNetworkService: OffersNetworkServiceProtocol, @unch
     public init() {}
     
     public func login(userIdentifier: String) async throws -> LoginResponseDTO {
-        // Simulate a short network delay
         try await Task.sleep(nanoseconds: 1_000_000_000)
         
-        // Mock successful login response
         let tokenResult = TokenResultDTO(
             tokenType: "JWT",
             accessToken: "mock_jwt_token_for_testing",
@@ -41,10 +38,8 @@ public final class MockOffersNetworkService: OffersNetworkServiceProtocol, @unch
     }
     
     public func fetchOffers(page: Int) async throws -> OffersResponseDTO {
-        // Simulate a short network delay
         try await Task.sleep(nanoseconds: 800_000_000)
         
-        // Mock list of offers
         let mockOffers = [
             OfferDTO(
                 id: 1,

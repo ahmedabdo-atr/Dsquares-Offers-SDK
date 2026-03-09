@@ -2,7 +2,7 @@
 //  LoginViewModel.swift
 //  DsquaresOffersSDK
 //
-//  Created by Ahmad A. on 02/03/2026.
+//  Created by Ahmad A. on 09/03/2026.
 //
 
 import Foundation
@@ -20,7 +20,6 @@ public final class LoginViewModel: ObservableObject {
     }
     
     public func login(userIdentifier: String) async {
-        print("👤 [ViewModel] Attempting login for \(userIdentifier)...")
         guard !userIdentifier.isEmpty else {
             errorMessage = "Please enter a valid identifier"
             return
@@ -32,17 +31,13 @@ public final class LoginViewModel: ObservableObject {
         do {
             let success = try await loginUseCase.execute(userIdentifier: userIdentifier)
             if success {
-                print("👤 [ViewModel] Login succeeded!")
                 isLoggedIn = true
             } else {
-                print("👤 [ViewModel] Login failed (logic returned false)")
                 errorMessage = "Authentication failed. Please try again."
             }
         } catch let error as NetworkError {
-            print("👤 [ViewModel] Network error: \(error.customMessage)")
             errorMessage = error.customMessage
         } catch {
-            print("👤 [ViewModel] Unexpected error: \(error.localizedDescription)")
             errorMessage = error.localizedDescription
         }
         

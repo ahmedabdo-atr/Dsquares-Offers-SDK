@@ -2,12 +2,11 @@
 //  OffersViewModel.swift
 //  DsquaresOffersSDK
 //
-//  Created by Ahmad Aboelghet on 01/03/2026.
+//  Created by Ahmad A. on 09/03/2026.
 //
 
 import Foundation
 
-// view state contains all the possible states of the view (loading, loaded, error, empty)
 public enum ViewState: Equatable {
     case idle
     case loading
@@ -49,10 +48,8 @@ public class OffersViewModel: ObservableObject {
     }
     
     private func fetchOffers(page: Int) async {
-        print("📦 [ViewModel] Fetching offers for page \(page)...")
         do {
             let newOffers = try await getOffersUseCase.execute(page: page)
-            print("📦 [ViewModel] Successfully received \(newOffers.count) offers.")
             
             if newOffers.isEmpty {
                 hasMorePages = false
@@ -67,7 +64,6 @@ public class OffersViewModel: ObservableObject {
             self.state = self.offers.isEmpty ? .empty : .loaded
             
         } catch {
-            print("📦 [ViewModel] Error fetching offers: \(error.localizedDescription)")
             self.state = .error(error.localizedDescription)
         }
     }

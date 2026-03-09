@@ -1,12 +1,19 @@
+//
+//  OffersListView.swift
+//  DsquaresOffersSDK
+//
+//  Created by Ahmad A. on 09/03/2026.
+//
+
 import SwiftUI
 
 public struct OffersListView: View {
     @StateObject private var viewModel: OffersViewModel
     @State private var searchText = ""
     @State private var selectedCategory = "All"
+    @Namespace private var catNamespace
     
     private let categories = ["All", "Electronics", "Fashion", "Grocery"]
-    
     private let columns = [
         GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
@@ -21,22 +28,14 @@ public struct OffersListView: View {
             DSColor.secondaryBackground.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Custom Navbar with Glassmorphism
                 headerView
                     .zIndex(10)
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
-                        // Search Section
                         searchBar
-                        
-                        // Promotional Banner (Mock)
                         bannerView
-                        
-                        // Categories
                         categoriesScrollView
-                        
-                        // Offers Content
                         contentView
                     }
                     .padding(.vertical, 20)
@@ -140,7 +139,6 @@ public struct OffersListView: View {
                 )
                 .shadow(color: DSColor.primary.opacity(0.3), radius: 15, x: 0, y: 10)
             
-            // Decorative shapes
             Circle()
                 .fill(Color.white.opacity(0.1))
                 .frame(width: 150)
@@ -222,7 +220,6 @@ public struct OffersListView: View {
             }
         }
     }
-    @Namespace private var catNamespace
     
     private var contentView: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -231,9 +228,7 @@ public struct OffersListView: View {
                     .font(DSTypography.subtitle())
                     .foregroundColor(DSColor.textPrimary)
                 Spacer()
-                Button("See All") { 
-                    // Action
-                }
+                Button("See All") { }
                 .font(DSTypography.caption().bold())
                 .foregroundColor(DSColor.primary)
             }

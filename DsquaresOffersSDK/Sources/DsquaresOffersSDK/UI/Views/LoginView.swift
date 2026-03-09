@@ -1,3 +1,10 @@
+//
+//  LoginView.swift
+//  DsquaresOffersSDK
+//
+//  Created by Ahmad A. on 09/03/2026.
+//
+
 import SwiftUI
 
 public struct LoginView: View {
@@ -11,11 +18,9 @@ public struct LoginView: View {
     
     public var body: some View {
         ZStack {
-            // Sophisticated Mesh-like Background
             LinearGradient(colors: [DSColor.secondaryBackground, Color.white], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
             
-            // Abstract Background Shapes
             VStack {
                 Circle()
                     .fill(DSColor.primary.opacity(0.04))
@@ -29,7 +34,6 @@ public struct LoginView: View {
             }
             
             VStack(spacing: 0) {
-                // Brand Header Section
                 VStack(spacing: 24) {
                     ZStack {
                         Circle()
@@ -56,14 +60,12 @@ public struct LoginView: View {
                 
                 Spacer()
                 
-                // Login Card (The Floating Look)
                 VStack(spacing: 32) {
                     VStack(alignment: .leading, spacing: 20) {
                         Text("Secure Login")
                             .font(.system(size: 22, weight: .bold, design: .rounded))
                             .foregroundColor(DSColor.textPrimary)
                         
-                        // Input Field with Prefix
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Mobile Number")
                                 .font(.system(size: 13, weight: .bold))
@@ -104,7 +106,6 @@ public struct LoginView: View {
                             .padding(.top, -15)
                     }
                     
-                    // Main Action Button
                     Button(action: {
                         Task {
                             await viewModel.login(userIdentifier: phoneNumber)

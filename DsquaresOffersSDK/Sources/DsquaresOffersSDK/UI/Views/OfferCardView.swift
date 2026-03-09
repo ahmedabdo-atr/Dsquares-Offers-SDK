@@ -1,18 +1,20 @@
+//
+//  OfferCardView.swift
+//  DsquaresOffersSDK
+//
+//  Created by Ahmad A. on 09/03/2026.
+//
+
 import SwiftUI
-#if canImport(UIKit)
-import UIKit
-#endif
 
 struct OfferCardView: View {
     let offer: Offer
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Image Section with better badges
             ZStack(alignment: .topTrailing) {
                 imageSection
                 
-                // Premium Badge
                 if let rewardType = offer.rewardType {
                     Text(rewardType)
                         .font(.system(size: 9, weight: .black))
@@ -26,7 +28,6 @@ struct OfferCardView: View {
                         .padding(10)
                 }
                 
-                // Locked State Overlay with Glassmorphism
                 if offer.isLocked {
                     Rectangle()
                         .fill(.ultraThinMaterial)
@@ -41,7 +42,6 @@ struct OfferCardView: View {
             .frame(height: 150)
             .clipped()
             
-            // Info Section
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Text(offer.merchantName ?? "Merchant")
@@ -105,7 +105,6 @@ struct OfferCardView: View {
     @ViewBuilder
     private var imageSection: some View {
         if let url = offer.imageUrl {
-            let _ = print("🖼️ [OfferCardView] Loading image from: \(url.absoluteString)")
             AsyncImage(url: url) { phase in
                 switch phase {
                 case .empty:

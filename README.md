@@ -1,59 +1,46 @@
 # Dsquares Offers SDK & Host Application
 
-This repository contains a production-ready Native Mobile SDK for fetching and displaying merchant offers, along with a Host Application demonstrating its seamless integration. The project is designed strictly following iOS best practices, focusing on modularity, clean architecture, and UI/UX fidelity.
+This repository contains a professional-grade Native Mobile SDK for fetching and displaying merchant offers, along with a Host Application demonstrating its seamless integration. The project is designed strictly following iOS best practices, focusing on modularity, clean architecture, and high UI/UX fidelity.
 
-## 🏗 Architecture Overview
+## Architecture Overview
 
-The solution is divided into two main components: an isolated SDK and a lightweight Host App. 
+The solution follows a modular strategy, separating core logic from the user interface:
 
-The SDK (`OffersSDK`) is implemented as a **Local Swift Package**. This ensures complete isolation from the host application and guarantees that the host app can only interact with the SDK through its defined public interface. 
+- **DsquaresOffersSDK:** A standalone Swift Package implementing the core rewards and loyalty logic. It follows Clean Architecture principles with clearly defined Layers (Data, Domain, Presentation).
+- **OffersHostApp:** A lightweight demonstration application that integrates the SDK through a dedicated abstraction layer.
 
-[cite_start]Within the SDK, I utilized the **MVVM (Model-View-ViewModel)** pattern combined with principles of Clean Architecture[cite: 62]:
-* **Presentation Layer:** Handled by SwiftUI Views and `ObservableObject` ViewModels. The ViewModels map data and manage UI states (Loading, Loaded, Empty, Error) internally, abstracting this logic from the Host App.
-* **Domain Layer:** Business rules, such as pagination logic and data validation, are encapsulated here.
-* **Data Layer:** A robust Networking service utilizing Swift's native `async/await` concurrency mechanism. It includes comprehensive error handling (e.g., offline states, invalid responses) and uses Protocols for dependency injection to facilitate unit testing.
+### Key Technical Pillars:
+- **Presentation:** Built entirely with SwiftUI, utilizing the MVVM pattern. ViewModels manage internal states (Loading, Error, Loaded) using advanced state management.
+- **Networking:** A robust, protocol-oriented networking layer using Swift's native `async/await`. It features flexible JSON decoding to handle diverse API response structures.
+- **Modularity:** The SDK is completely isolated, exposing only necessary interfaces to ensure plug-and-play capability.
 
-## 🚀 Setup & Build Instructions
+## Setup & Build Instructions
 
-1. Clone the repository:
+1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/YOUR_USERNAME/Dsquares-Offers-SDK.git](https://github.com/YOUR_USERNAME/Dsquares-Offers-SDK.git)
-Open the workspace file DsquaresOffersWorkspace.xcworkspace in Xcode (Do not open the .xcodeproj files directly to maintain the package links).
+   git clone https://github.com/ahmedabdo-atr/Dsquares-Offers-SDK.git
+   ```
+2. **Open the Workspace:**
+   Open `DsquaresOffersWorkspace.xcworkspace` in Xcode. (Ensure you open the workspace to maintain package links).
+3. **Run the Application:**
+   Select the `OffersHostApp` target and a simulator (iOS 15.0+), then press `Cmd + R`.
 
-Ensure the target is set to OffersHostApp.
+## SDK Integration
 
-Select an iOS Simulator running iOS 15.0 or later.
+Integrating the SDK is straightforward. The recommended approach is to use the `OffersSDKManager` abstraction:
 
-Press Cmd + R to build and run the application.
+```swift
+import DsquaresOffersSDK
 
-🔌 SDK Public Interface & Integration
-The SDK is designed to be plug-and-play. All internal logic (networking, state management, caching) is completely hidden from the Host App.
+// In your Host App
+OffersSDKManager.createOffersScreen()
+```
 
-1. Integration Layer
-The Host App utilizes a simple abstraction layer OffersSDKManager to interact with the SDK. This prevents tight coupling.
+## Features
 
-Swift
-import SwiftUI
-import OffersSDK
+- **Premium UI:** High-end design with glassmorphism, gradients, and a modern "Floating Card" login interface.
+- **Smart Data Fetching:** Supports pagination and pull-to-refresh for an optimal user experience.
+- **Robustness:** Comprehensive error handling and state feedback for offline or server-side issues.
+- **Modularity:** Low coupling with the host app, making it easy to drop into any existing project.
 
-public struct OffersSDKManager {
-    public static func createOffersScreen() -> some View {
-        return OffersListView()
-    }
-}
-2. Presenting the SDK
-The host app can present the SDK effortlessly from any standard View hierarchy.
-
-Swift
-// Inside your Host App View
-.sheet(isPresented: $showOffers) {
-    OffersSDKManager.createOffersScreen()
-}
-✨ Key Features Implemented
-Native Concurrency: async/await for efficient and readable networking.
-
-Pagination & Pull-to-Refresh: Seamless data navigation as per API capabilities.
-
-State Isolation: The SDK manages its own loading indicators and offline warnings.
-
-Unit Testing: Critical components including networking mapping and business logic are fully tested.
+Ahmad A. 09/03/2026.

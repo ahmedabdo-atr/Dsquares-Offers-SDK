@@ -2,12 +2,11 @@
 //  ItemsDTO.swift
 //  DsquaresOffersSDK
 //
-//  Created by Ahmad A. on 08/03/2026.
+//  Created by Ahmad A. on 09/03/2026.
 //
 
 import Foundation
 
-/// Request body for the Items API
 public struct ItemsRequestDTO: Encodable {
     public let data: ItemsRequestData
     
@@ -30,7 +29,6 @@ public struct ItemsRequestData: Encodable {
     public let rewardTypes: [String]
 }
 
-/// Response data for the Items API
 public struct ItemsResponseDTO: Codable {
     public let result: ItemsResult?
     public let message: String?
@@ -109,7 +107,6 @@ public struct ItemDTO: Codable {
     
     enum CodingKeys: String, CodingKey {
         case code, name, description, locked, rewardType, denominations, imageUrl
-        // Extra keys for decoding
         case image_url, ImageUrl, RewardType, Locked, Code, Name, Description
         case brand, Brand, Logo, logo, BrandLogo, brand_logo
     }
@@ -117,11 +114,9 @@ public struct ItemDTO: Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        // Flexible Code Loading
         code = (try? container.decode(String.self, forKey: .code)) ?? 
                (try? container.decode(String.self, forKey: .Code)) ?? ""
         
-        // Flexible Name/Brand Loading
         name = (try? container.decode(String.self, forKey: .name)) ?? 
                (try? container.decode(String.self, forKey: .Name)) ?? 
                (try? container.decode(String.self, forKey: .brand)) ?? 
@@ -132,16 +127,14 @@ public struct ItemDTO: Codable {
         rewardType = (try? container.decodeIfPresent(String.self, forKey: .rewardType)) ?? (try? container.decodeIfPresent(String.self, forKey: .RewardType))
         denominations = try container.decodeIfPresent([DenominationDTO].self, forKey: .denominations)
         
-        // Flexible Image Loading
         let rootImg = (try? container.decodeIfPresent(String.self, forKey: .imageUrl)) ?? 
                       (try? container.decodeIfPresent(String.self, forKey: .image_url)) ?? 
                       (try? container.decodeIfPresent(String.self, forKey: .ImageUrl))
                       
-        let l1 = (try? container.decodeIfPresent(String.self, forKey: .logo))
-        let l2 = (try? container.decodeIfPresent(String.self, forKey: .Logo))
-        let l3 = (try? container.decodeIfPresent(String.self, forKey: .brand_logo))
-        let l4 = (try? container.decodeIfPresent(String.self, forKey: .BrandLogo))
-        let logoImg = l1 ?? l2 ?? l3 ?? l4
+        let logoImg = (try? container.decodeIfPresent(String.self, forKey: .logo)) ?? 
+                      (try? container.decodeIfPresent(String.self, forKey: .Logo)) ?? 
+                      (try? container.decodeIfPresent(String.self, forKey: .brand_logo)) ?? 
+                      (try? container.decodeIfPresent(String.self, forKey: .BrandLogo))
                       
         imageUrl = rootImg ?? logoImg
     }
@@ -157,7 +150,6 @@ public struct ItemDTO: Codable {
         try container.encode(denominations, forKey: .denominations)
     }
     
-    // Mapping to Domain Entity
     func toDomain() -> Offer {
         let firstDenom = denominations?.first
         let rawImageUrl = (imageUrl != nil && !imageUrl!.isEmpty) ? imageUrl : firstDenom?.imageUrl
@@ -231,7 +223,6 @@ public struct DenominationDTO: Codable {
         points = (try? container.decodeIfPresent(Int.self, forKey: .points)) ?? (try? container.decodeIfPresent(Int.self, forKey: .Points))
         discount = try? container.decodeIfPresent(String.self, forKey: .discount)
         
-        // Flexi-Image Loading
         imageUrl = (try? container.decodeIfPresent(String.self, forKey: .imageUrl)) ?? 
                    (try? container.decodeIfPresent(String.self, forKey: .image_url)) ?? 
                    (try? container.decodeIfPresent(String.self, forKey: .ImageUrl))

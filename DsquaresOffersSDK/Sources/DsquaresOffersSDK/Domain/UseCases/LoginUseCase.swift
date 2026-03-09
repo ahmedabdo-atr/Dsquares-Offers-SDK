@@ -2,7 +2,7 @@
 //  LoginUseCase.swift
 //  DsquaresOffersSDK
 //
-//  Created by Ahmad A. on 02/03/2026.
+//  Created by Ahmad A. on 09/03/2026.
 //
 
 import Foundation
@@ -20,7 +20,6 @@ public final class LoginUseCase: LoginUseCaseProtocol {
     
     public func execute(userIdentifier: String) async throws -> Bool {
         let response = try await networkService.login(userIdentifier: userIdentifier)
-        // Login is successful if we have an access token and status is 1
         return response.result?.accessToken != nil && response.statusCode == 1
     }
 }

@@ -1,13 +1,12 @@
 //
-//  OfferDTO.swift
+//  OfferModels.swift
 //  DsquaresOffersSDK
 //
-//  Created by Ahmad Aboelghet on 01/03/2026.
+//  Created by Ahmad A. on 09/03/2026.
 //
 
 import Foundation
 
-// Data Transfer Object representing each offer returned from the API
 public struct OfferDTO: Codable {
     public let id: Int
     public let title: String
@@ -44,7 +43,6 @@ public struct OfferDTO: Codable {
         case points
     }
     
-    // Mapping to Domain Entity
     func toDomain() -> Offer {
         return Offer(
             id: id,
@@ -59,7 +57,6 @@ public struct OfferDTO: Codable {
     }
 }
 
-// Data Transfer Object representing the API response containing offers and pagination info
 public struct OffersResponseDTO: Codable {
     public let data: [OfferDTO]
     public let totalCount: Int?

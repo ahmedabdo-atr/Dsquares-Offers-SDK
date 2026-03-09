@@ -2,12 +2,11 @@
 //  AuthDTOs.swift
 //  DsquaresOffersSDK
 //
-//  Created by Ahmad A. on 02/03/2026.
+//  Created by Ahmad A. on 09/03/2026.
 //
 
 import Foundation
 
-/// Request body for the Token API
 public struct LoginRequestDTO: Encodable {
     public let data: LoginData
     
@@ -24,7 +23,6 @@ public struct LoginData: Encodable {
     }
 }
 
-/// Response data for the Token API
 public struct LoginResponseDTO: Codable {
     public let result: TokenResultDTO?
     public let message: String?
